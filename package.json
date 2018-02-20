@@ -1,0 +1,56 @@
+{
+	"name": "postfixcsv",
+	"version": "1.0.0",
+	"author": {
+		"name": "Dominik Wilkowski",
+		"email": "Hi@Dominik-Wilkowski.com",
+		"url": "https://dominik-wilkowski.com/"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/dominikwilkowski/postfixcsv.git"
+	},
+	"bugs": {
+		"url": "https://github.com/dominikwilkowski/postfixcsv/issues"
+	},
+	"licenses": [
+		{
+			"type": "GPL-3.0",
+			"url": "https://github.com/dominikwilkowski/postfixcsv/blob/master/LICENSE"
+		}
+	],
+	"engines": {
+		"node": ">=8"
+	},
+	"scripts": {
+		"test": "jest --coverage"
+	},
+	"jest": {
+		"testEnvironment": "node",
+		"testRegex": "\\.spec.js$",
+		"collectCoverageFrom": [
+			"src/*.js"
+		],
+		"coverageThreshold": {
+			"global": {
+				"branches": 0,
+				"functions": 0,
+				"lines": 0,
+				"statements": 0
+			}
+		}
+	},
+	"dependencies": {
+		"jest-cli": "^22.3.0"
+	},
+	"devDependencies": {},
+	"files": [
+		"index.js",
+		"src/*"
+	],
+	"main": "src/postfixcsv.js",
+	"bin": {
+		"postfixcsv": "./index.js"
+	},
+	"license": "GPL-3.0"
+}
