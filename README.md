@@ -43,8 +43,10 @@ the CLI use on top.
 
 ### Limitations
 
-- The package will produce bugs with spreadsheets that have more than 676 columns. I did no feel I should add a catch there for the purpose of this small test.
+- The package will produce bugs with spreadsheets that have more than 701 columns. I did no feel I should add a catch there for the purpose of this small test.
+  (For the sake of staying close to what spreadsheet apps do otherwise I would have simply implemented an numerical postfix which does not have any limitations)
 - The data is currently looped over twice for creating a GRID object and the actual render loop. This can and should be optimized in the future.
+- I would also look into a more battle tested `IsNumber` method as mine seems to work but I'm not sure in what condition it may fail ;)
 
 
 ### Design decisions

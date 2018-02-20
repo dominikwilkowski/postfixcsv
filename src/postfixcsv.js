@@ -61,7 +61,7 @@ const GetCol = ( col ) => {
 	const index = Math.floor( col / INDEXES.length );
 
 	// making sure we can handle more than 26 cells by adding a postfix to each cell
-	// (now supports 676 which is not infinite but at least aligns with what spreadsheet apps do)
+	// (now supports 701 which is not infinite but at least aligns with what spreadsheet apps do)
 	return `${ index > 0 ? INDEXES[ index - 1 ] : '' }${ INDEXES[ col - INDEXES.length * index ] }`;
 };
 
@@ -132,7 +132,7 @@ const IsNumber = ( item ) => ( parseFloat( item ) - parseFloat( item ) + 1 ) ===
  * @param  {string} expression - The expression to be parsed
  * @param  {object} GRID       - The GRID object
  * @param  {object} thisCell   - The coordinate of this cell
- * @param  {object} parsed     - All previously parsed fields to avoid a dependency loop
+ * @param  {object} parsed     - All previously parsed fields so we can detect a dependency loop
  *
  * @return {number}            - The result of the expression
  */

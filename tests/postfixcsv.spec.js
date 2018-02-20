@@ -72,7 +72,7 @@ test('GetCol - Should give us the right column index', () => {
 	expect( GetCol( 26 ) )
 		.toBe('AA');
 
-	expect( GetCol( 500 ) )
+	expect( GetCol( 701 ) )
 		.toBe('SG');
 });
 
