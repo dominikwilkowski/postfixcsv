@@ -17,14 +17,28 @@
  * Dependencies
  */
 const Postfixcsv = require('./src/postfixcsv.js').Postfixcsv;
-const ParseArgs = require('./src/cli.js');
+const CleanCSV = require('./src/postfixcsv.js').CleanCSV;
+const ParseArgs = require('./src/cli.js').ParseArgs;
+const ReadFile = require('./src/cli.js').ReadFile;
+const Path = require('path');
+const Fs = require('fs');
 
 
 const SETTINGS = ParseArgs();
 
+const fileLocation = Path.normalize(`${ process.cwd() }/${ SETTINGS.file }`);
+
+if( !Fs.existsSync( fileLocation ) ) {
+	console.error(`Cannot find file at >>${ fileLocation }<<`);
+
+	return;
+}
+
 ( async function () {
 	try {
-		const postfix = await Postfixcsv( SETTINGS );
+		const CSV = CleanCSV( await ReadFile( fileLocation ) );
+
+		const postfix = Postfixcsv( CSV, SETTINGS.separator );
 
 		console.log();
 		console.log('The parsed output of the supplied CSV file is:');

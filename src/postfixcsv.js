@@ -2,37 +2,6 @@
 
 
 /**
- * Dependencies
- */
-const Path = require('path');
-const Fs = require('fs');
-
-
-/**
- * Promisified reading a file
- *
- * @param  {string} location - The location of the file to be read
- *
- * @return {promise object}  - The content of the file
- */
-const ReadFile = ( location ) => {
-	return new Promise( ( resolve, reject ) => {
-		Fs.readFile( Path.normalize( location ), `utf8`, ( error, content ) => {
-			if( error ) {
-				console.error(`Reading file failed for >>${ location }<<`);
-				console.error( JSON.stringify( error ) );
-
-				reject( error );
-			}
-			else {
-				resolve( content );
-			}
-		});
-	});
-};
-
-
-/**
  * An index collection of column descriptions
  *
  * @type {Array}
@@ -202,7 +171,9 @@ const ParsePostfix = ( expression, GRID, thisCell, parsed = [] ) => {
 	});
 
 	if( queue.length > 1 ) {
-		errors.push(`ERROR: Expression at >>${ thisCell }<< no valid (2)`);
+		if( !errors.includes(`ERROR: Expression at >>${ thisCell }<< no valid (1)`) ) {
+			errors.push(`ERROR: Expression at >>${ thisCell }<< no valid (2)`);
+		}
 
 		return {
 			expression: '#ERR',
@@ -268,35 +239,17 @@ const ParseCells = ( CSV, GRID, separator ) => {
 /**
  * Open a CSV file and parse all postfix notations inside
  *
- * @param  {string} file      - The path to the CSV file relative to your current working directory
- * @param  {string} separator - The CSV separator
+ * @param  {string} file      - The CSV content
+ * @param  {string} separator - The CSV separator, optional, default: ","
  *
  * @return {string}           - The parsed output of the table
  */
-const Postfixcsv = ({ file, separator = ',' }) => {
-	const fileLocation = Path.normalize(`${ process.cwd() }/${ file }`);
+const Postfixcsv = ( CSV, separator = ',' ) => {
 
-	if( !Fs.existsSync( fileLocation ) ) {
-		console.error(`Cannot find file at >>${ fileLocation }<<`);
+	const GRID = MakeGrid( CSV, separator );
+	const result = ParseCells( CSV, GRID, separator );
 
-		return;
-	}
-
-	return new Promise( ( resolve, reject ) => {
-		( async function () {
-			try {
-				const CSV = CleanCSV( await ReadFile( fileLocation ) );
-				const GRID = MakeGrid( CSV, separator );
-
-				const result = ParseCells( CSV, GRID, separator );
-
-				resolve( result );
-			}
-			catch( error ) {
-				reject( error );
-			}
-		})();
-	});
+	return result;
 };
 
 
@@ -304,7 +257,6 @@ const Postfixcsv = ({ file, separator = ',' }) => {
  * Export
  */
 module.exports = exports = {
-	ReadFile,
 	INDEXES,
 	CleanCSV,
 	GetCol,

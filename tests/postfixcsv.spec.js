@@ -73,7 +73,7 @@ test('GetCol - Should give us the right column index', () => {
 		.toBe('AA');
 
 	expect( GetCol( 701 ) )
-		.toBe('SG');
+		.toBe('ZZ');
 });
 
 
@@ -274,14 +274,12 @@ test('ParseCells - Should parse several cells in a row', () => {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Postfixcsv
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-test('Postfixcsv - Should parse a file correctly', () => {
-	return Postfixcsv({ file: 'tests/mock/test.csv' }).then( data => {
-		expect( data ).toMatchObject({
+test('Postfixcsv - Should parse the CSV content correctly', () => {
+	expect( Postfixcsv( '1 2 +, 2 2 -\n1 1 *,2 3 5 * +\n1 + 2,A1 B1 +' ) )
+		.toMatchObject({
 			errors: [
-				"ERROR: Expression at >>D1<< no valid (1)",
-				"ERROR: Expression at >>B3<< no valid (2)",
+				'ERROR: Expression at >>A3<< no valid (1)',
 			],
-			output: '-8,-13,0,#ERR\n-8,5,0,3.5\n0,#ERR,0,14',
+			output: '3,0\n1,17\n#ERR,3',
 		});
-	});
 });
