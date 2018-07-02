@@ -19,18 +19,18 @@
  **************************************************************************************************************************************************************/
 
 
-const PostfixcsvExport = require('../src/postfixcsv.js');
-
-const INDEXES = PostfixcsvExport.INDEXES;
-const CleanCSV = PostfixcsvExport.CleanCSV;
-const GetCol = PostfixcsvExport.GetCol;
-const MakeGrid = PostfixcsvExport.MakeGrid;
-const IsCoordinate = PostfixcsvExport.IsCoordinate;
-const IsOperator = PostfixcsvExport.IsOperator;
-const IsNumber = PostfixcsvExport.IsNumber;
-const ParsePostfix = PostfixcsvExport.ParsePostfix;
-const ParseCells = PostfixcsvExport.ParseCells;
-const Postfixcsv = PostfixcsvExport.Postfixcsv;
+const {
+	INDEXES,
+	CleanCSV,
+	GetCol,
+	MakeGrid,
+	IsCoordinate,
+	IsOperator,
+	IsNumber,
+	ParsePostfix,
+	ParseCells,
+	Postfixcsv,
+} = require('../src/postfixcsv.js');
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -199,7 +199,13 @@ test('IsNumber - Should detect numerical numbers', () => {
 	expect( IsNumber('20000.1') )
 		.toBe( true );
 
+	expect( IsNumber(20000.1) )
+		.toBe( true );
+
 	expect( IsNumber('-324.8') )
+		.toBe( true );
+
+	expect( IsNumber(-324.8) )
 		.toBe( true );
 
 	expect( IsNumber('E534') )
@@ -220,6 +226,12 @@ test('IsNumber - Should detect numerical numbers', () => {
 // ParsePostfix
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 test('ParsePostfix - Should calculate reverse polish notation correctly', () => {
+	expect( ParsePostfix( '', [], 'A1' ) )
+		.toMatchObject({
+			errors: [],
+			expression: 0,
+		});
+
 	expect( ParsePostfix( '2 1 +', [], 'A1' ) )
 		.toMatchObject({
 			errors: [],
@@ -252,7 +264,53 @@ test('ParsePostfix - Should be able to handle dependency loop', () => {
 		.toMatchObject({
 			errors: [
 				"ERROR: Dependency loop detected in A1",
-				"ERROR: Expression at >>A1<< no valid (1)",
+				"ERROR: Expression at >>A1<< not valid (1)",
+			],
+			expression: '#ERR',
+		});
+
+	expect( ParsePostfix( '2 B2 +', [{ A: '2 B2 +' }, { B: '2 A1 +' }, { B: '3 2 B1 * +' }], 'A1' ) )
+		.toMatchObject({
+			errors: [
+				"ERROR: Dependency loop detected in A1 -> B2",
+				"ERROR: Expression at >>B2<< not valid (1)",
+				"ERROR: Expression at >>A1<< not valid (1)",
+			],
+			expression: '#ERR',
+		});
+});
+
+test('ParsePostfix - Should not double up on errors for same field', () => {
+	expect( ParsePostfix( '1 + 1', [], 'A1' ) )
+		.toMatchObject({
+			errors: [
+				"ERROR: Expression at >>A1<< not valid (1)",
+			],
+			expression: '#ERR',
+		});
+
+	expect( ParsePostfix( '1 1 + + 1 +', [], 'A1' ) )
+		.toMatchObject({
+			errors: [
+				"ERROR: Expression at >>A1<< not valid (1)",
+			],
+			expression: '#ERR',
+		});
+});
+
+test('ParsePostfix - Both error messages are added correctly', () => {
+	expect( ParsePostfix( '+', [], 'A1' ) )
+		.toMatchObject({
+			errors: [
+				"ERROR: Expression at >>A1<< not valid (1)",
+			],
+			expression: '#ERR',
+		});
+
+	expect( ParsePostfix( '1 2', [], 'A1' ) )
+		.toMatchObject({
+			errors: [
+				"ERROR: Expression at >>A1<< not valid (2)",
 			],
 			expression: '#ERR',
 		});
@@ -268,6 +326,12 @@ test('ParseCells - Should parse several cells in a row', () => {
 			errors: [],
 			output: '3,4',
 		});
+
+	expect( ParseCells( '1 2 +', [], ',' ) )
+		.toMatchObject({
+			errors: [],
+			output: '3',
+		});
 });
 
 
@@ -275,10 +339,10 @@ test('ParseCells - Should parse several cells in a row', () => {
 // Postfixcsv
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 test('Postfixcsv - Should parse the CSV content correctly', () => {
-	expect( Postfixcsv( '1 2 +, 2 2 -\n1 1 *,2 3 5 * +\n1 + 2,A1 B1 +' ) )
+	expect( Postfixcsv( '1 2 +, 2 2 -\n1 1 *,2 3 5  * +\n1 + 2,A1  B1 +' ) )
 		.toMatchObject({
 			errors: [
-				'ERROR: Expression at >>A3<< no valid (1)',
+				'ERROR: Expression at >>A3<< not valid (1)',
 			],
 			output: '3,0\n1,17\n#ERR,3',
 		});

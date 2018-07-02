@@ -48,11 +48,11 @@ const MakeGrid = ( data, separator ) => {
 
 	data
 		.split('\n')
-		.map( line => {
+		.forEach( line => {
 			const cells = line.split( separator );
 			const row = {};
 
-			cells.map( ( cell, i ) => {
+			cells.forEach( ( cell, i ) => {
 				const index = Math.floor( i / INDEXES.length );
 
 				row[ GetCol( i ) ] = cell;
@@ -123,7 +123,7 @@ const ParsePostfix = ( expression, GRID, thisCell, parsed = [] ) => {
 		};
 	}
 
-	items.map( item => {
+	items.forEach( item => {
 		if( IsNumber( item ) ) {
 			queue.push( parseFloat( item ) );
 		}
@@ -144,7 +144,9 @@ const ParsePostfix = ( expression, GRID, thisCell, parsed = [] ) => {
 			let result;
 
 			if( !IsNumber( x ) || !IsNumber( y ) ) {
-				errors.push(`ERROR: Expression at >>${ thisCell }<< no valid (1)`);
+				if( !errors.includes(`ERROR: Expression at >>${ thisCell }<< not valid (1)`) ) {
+					errors.push(`ERROR: Expression at >>${ thisCell }<< not valid (1)`);
+				}
 
 				queue.push('#ERR');
 			}
@@ -171,8 +173,8 @@ const ParsePostfix = ( expression, GRID, thisCell, parsed = [] ) => {
 	});
 
 	if( queue.length > 1 ) {
-		if( !errors.includes(`ERROR: Expression at >>${ thisCell }<< no valid (1)`) ) {
-			errors.push(`ERROR: Expression at >>${ thisCell }<< no valid (2)`);
+		if( !errors.includes(`ERROR: Expression at >>${ thisCell }<< not valid (1)`) ) {
+			errors.push(`ERROR: Expression at >>${ thisCell }<< not valid (2)`);
 		}
 
 		return {
@@ -205,23 +207,21 @@ const ParseCells = ( CSV, GRID, separator ) => {
 
 	CSV
 		.split('\n')
-		.map( ( line, i ) => {
+		.forEach( ( line, i ) => {
 			const cells = line.split( separator );
 			const outputRow = [];
 			const thisRow = i + 1;
 
-			if( cells.length > 1 ) {
-				cells.map( ( cell, j ) => {
-					const thisCol = GetCol( j );
+			cells.forEach( ( cell, j ) => {
+				const thisCol = GetCol( j );
 
-					const thisCell = ParsePostfix( cell, GRID, `${ thisCol }${ thisRow }` );
+				const thisCell = ParsePostfix( cell, GRID, `${ thisCol }${ thisRow }` );
 
-					errors = [ ...errors, ...thisCell.errors ];
-					outputRow.push( thisCell.expression );
-				});
+				errors = [ ...errors, ...thisCell.errors ];
+				outputRow.push( thisCell.expression );
+			});
 
-				output.push( outputRow.join( separator ) );
-			}
+			output.push( outputRow.join( separator ) );
 
 		});
 
