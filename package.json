@@ -23,7 +23,8 @@
 		"node": ">=8"
 	},
 	"scripts": {
-		"test": "jest --coverage"
+		"test": "jest --coverage",
+		"nuke": "rm -rf node_modules && rm yarn.lock"
 	},
 	"jest": {
 		"testEnvironment": "node",
@@ -41,7 +42,7 @@
 		}
 	},
 	"dependencies": {
-		"jest-cli": "^23.6.0"
+		"jest-cli": "^24.8.0"
 	},
 	"devDependencies": {},
 	"files": [
