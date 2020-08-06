@@ -42,7 +42,7 @@
 		}
 	},
 	"dependencies": {
-		"jest-cli": "^26.1.0"
+		"jest-cli": "^26.2.2"
 	},
 	"devDependencies": {},
 	"files": [

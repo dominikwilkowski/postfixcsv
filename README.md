@@ -2,7 +2,57 @@ POSTFIX-CSV
 ===========
 
 
-## Install
+## The task
+
+Create a cli node app that parses a csv spreadsheet file and outputs it's content.
+The spreadsheet should be able to support [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) calculations
+and references to other cells via the `A1` or `Z987` reference.
+When errors are found the output for the cell should be `#ERR`.
+You're not allowed to use any packages from npm.
+Please write all of your code yourself.
+
+The spreadsheet format coordination system should be [Col alphabetical][Row numeric]
+
+```
+| A1 | B1 | C1 |
+----------------
+| A2 | B2 | C2 |
+----------------
+| A3 | B3 | C3 |
+```
+
+
+Test file:
+
+```csv
+B1 B2 +,2 B2 3 * -,+
+A1,5,7 2 /
+C2 3 *,1 2,5 1 2 + 4 * + 3 -
+```
+
+Which should output:
+
+```
+-8,-13,#ERR
+-8,5,3.5
+0,#ERR,14
+```
+
+Think about edge cases and deal with them.
+
+
+## What we are looking for
+
+The task specifically does not mention:
+- how to deal with whitespace in the csv
+- what the format of the csv is (comma separated or otherwise)
+- how to deal with when a cell is empty
+- how to deal with more rows in a csv than the English alphabet
+- how to deal with an infinite reference loop
+- how the cli interface is defined
+
+
+## What I did
 
 Download the repo and run `npm link` inside the folder.
 Now run the package against your csv file:
