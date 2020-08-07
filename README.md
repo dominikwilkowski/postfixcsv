@@ -6,7 +6,7 @@ POSTFIX-CSV
 
 Create a cli node app that parses a csv spreadsheet file and outputs it's content.
 The spreadsheet should be able to support [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) calculations
-and references to other cells via the `A1` or `Z987` reference.
+(implement only the four most common operators: `+`,`-`,`/` and `*`) and references to other cells via the `A1` or `Z987` reference.
 When errors are found the output for the cell should be `#ERR`.
 You're not allowed to use any packages from npm.
 Please write all of your code yourself.
@@ -35,7 +35,7 @@ Which should output:
 ```
 -8,-13,#ERR
 -8,5,3.5
-0,#ERR,14
+10.5,#ERR,14
 ```
 
 Think about edge cases and deal with them.
