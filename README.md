@@ -24,10 +24,9 @@ The spreadsheet format coordination system should be `[Col (alphabetical)][Row (
 | A3 | B3 | C3 |
 ```
 
+Test csv file:
 
-Test file:
-
-```csv
+```
 B1 B2 +,2 B2 3 * -,+
 A1,5,7 2 /
 C2 3 *,1 2,5 1 2 + 4 * + 3 -
@@ -60,13 +59,13 @@ The task specifically does not mention:
 Download the repo and run `npm link` inside the folder.
 Now run the package against your csv file:
 
-```shell
+```sh
 $ postfixcsv tests/mock/test.csv
 ```
 
 If you got an CSV file that is semicolon separated or uses any other separator you can use the custom flag to parse it correctly.
 
-```shell
+```sh
 $ postfixcsv tests/mock/test.csv -s \;
 ```
 
