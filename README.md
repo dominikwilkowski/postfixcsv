@@ -4,14 +4,17 @@ POSTFIX-CSV
 
 ## The task
 
-Create a cli node app that parses a csv spreadsheet file and outputs it's content.
-The spreadsheet should be able to support [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) calculations
-(implement only the four most common operators: `+`,`-`,`/` and `*`) and references to other cells via the `A1` or `Z987` reference.
-When errors are found the output for the cell should be `#ERR`.
-You're not allowed to use any packages from npm.
-Please write all of your code yourself.
+- Create a cli node app that parses a csv spreadsheet file and outputs it's content
+- The spreadsheet should be able to support:
+	- [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) calculations
+		- Implement only the four most common operators: `+`,`-`,`/` and `*`
+	- References to other cells via letter number notation (`A1` or `Z987`)
+		- Letters refer to columns, numbers to rows
+- When errors are found the output for that cell should be `#ERR`
+- You're not allowed to use any packages from npm
+- The app should print the output to `stdout`
 
-The spreadsheet format coordination system should be [Col alphabetical][Row numeric]
+The spreadsheet format coordination system should be `[Col (alphabetical)][Row (numeric)]`
 
 ```
 | A1 | B1 | C1 |
@@ -44,12 +47,12 @@ Think about edge cases and deal with them.
 ## What we are looking for
 
 The task specifically does not mention:
-- how to deal with whitespace in the csv
-- what the format of the csv is (comma separated or otherwise)
-- how to deal with when a cell is empty
-- how to deal with more rows in a csv than the English alphabet
-- how to deal with an infinite reference loop
-- how the cli interface is defined
+- How to deal with whitespace in the csv
+- What the format of the csv is (comma separated or otherwise)
+- How to deal with when a cell is empty
+- How to deal with more rows in a csv than the English alphabet
+- How to deal with an infinite reference loop
+- How the cli interface is defined
 
 
 ## What I did
