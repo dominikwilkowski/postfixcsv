@@ -1,6 +1,3 @@
-'use strict';
-
-
 /**
  * An index collection of column descriptions
  *
@@ -16,7 +13,9 @@ const INDEXES = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M
  *
  * @return {string}     - The cleaned CSV content
  */
-const CleanCSV = ( CSV ) => CSV.replace( /\r?\n|\r/g, '\n' ).replace( /  +/g, ' ' );
+function CleanCSV( CSV ) {
+	return CSV.replace( /\r?\n|\r/g, '\n' ).replace( /  +/g, ' ' );
+}
 
 
 /**
@@ -26,7 +25,7 @@ const CleanCSV = ( CSV ) => CSV.replace( /\r?\n|\r/g, '\n' ).replace( /  +/g, ' 
  *
  * @return {string}      - The column ID
  */
-const GetCol = ( col ) => {
+function GetCol( col ) {
 	const index = Math.floor( col / INDEXES.length );
 
 	// making sure we can handle more than 26 cells by adding a postfix to each cell
@@ -43,7 +42,7 @@ const GetCol = ( col ) => {
  *
  * @return {object}           - An object array
  */
-const MakeGrid = ( data, separator ) => {
+function MakeGrid( data, separator ) {
 	const grid = [];
 
 	data
@@ -72,7 +71,9 @@ const MakeGrid = ( data, separator ) => {
  *
  * @return {boolean}     - The result of the test
  */
-const IsCoordinate = ( item ) => /^[a-zA-Z]+[0-9]+$/.test( item );
+function IsCoordinate( item ) {
+	return /^[a-zA-Z]+[0-9]+$/.test( item );
+}
 
 
 /**
@@ -82,7 +83,9 @@ const IsCoordinate = ( item ) => /^[a-zA-Z]+[0-9]+$/.test( item );
  *
  * @return {boolean}     - The result of the test
  */
-const IsOperator = ( item ) => [ '+', '-', '*', '/' ].includes( item );
+function IsOperator( item ) {
+	return [ '+', '-', '*', '/' ].includes( item );
+}
 
 
 /**
@@ -92,7 +95,9 @@ const IsOperator = ( item ) => [ '+', '-', '*', '/' ].includes( item );
  *
  * @return {boolean}             - The result of the test
  */
-const IsNumber = ( item ) => ( parseFloat( item ) - parseFloat( item ) + 1 ) === 1 && String( parseFloat( item ) ).length === String( item ).length;
+function IsNumber( item ) {
+	return ( parseFloat( item ) - parseFloat( item ) + 1 ) === 1 && String( parseFloat( item ) ).length === String( item ).length;
+}
 
 
 /**
@@ -105,7 +110,7 @@ const IsNumber = ( item ) => ( parseFloat( item ) - parseFloat( item ) + 1 ) ===
  *
  * @return {number}            - The result of the expression
  */
-const ParsePostfix = ( expression, GRID, thisCell, parsed = [] ) => {
+function ParsePostfix( expression, GRID, thisCell, parsed = [] ) {
 	if( expression === ' ' || expression === '' ) {
 		expression = '0'; // I don’t agree, empty cells should be invalid...
 	}
@@ -201,7 +206,7 @@ const ParsePostfix = ( expression, GRID, thisCell, parsed = [] ) => {
  *
  * @return {string}           - The output string
  */
-const ParseCells = ( CSV, GRID, separator ) => {
+function ParseCells( CSV, GRID, separator ) {
 	let output = [];
 	let errors = [];
 
@@ -244,7 +249,7 @@ const ParseCells = ( CSV, GRID, separator ) => {
  *
  * @return {string}           - The parsed output of the table
  */
-const Postfixcsv = ( CSV, separator = ',' ) => {
+function Postfixcsv( CSV, separator = ',' ) {
 
 	const GRID = MakeGrid( CSV, separator );
 	const result = ParseCells( CSV, GRID, separator );

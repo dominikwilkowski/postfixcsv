@@ -1,11 +1,5 @@
-'use strict';
-
-
-/**
- * Dependencies
- */
-const Path = require('path');
-const Fs = require('fs');
+const path = require('path');
+const fs = require('fs');
 
 
 /**
@@ -15,7 +9,7 @@ const Fs = require('fs');
  *
  * @return {object}     - All arguments parsed into a settings object
  */
-const ParseArgs = ( args = process.argv ) => {
+function ParseArgs( args = process.argv ) {
 	const _hasSeparator = args.includes('-s') && args[ args.indexOf('-s') + 1 ];
 
 	return {
@@ -36,9 +30,9 @@ const ParseArgs = ( args = process.argv ) => {
  *
  * @return {promise object}  - The content of the file
  */
-const ReadFile = ( location ) => {
+function ReadFile( location ) {
 	return new Promise( ( resolve, reject ) => {
-		Fs.readFile( Path.normalize( location ), `utf8`, ( error, content ) => {
+		fs.readFile( path.normalize( location ), `utf8`, ( error, content ) => {
 			if( error ) {
 				console.error(`Reading file failed for >>${ location }<<`);
 				console.error( JSON.stringify( error ) );
