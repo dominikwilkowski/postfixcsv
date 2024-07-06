@@ -1,14 +1,13 @@
 use std::env;
 
+pub mod args;
 pub mod coord;
 pub mod postfixcsv;
 
+use crate::args::Args;
+
 fn main() {
-	let cli_args = env::args().skip(1).collect::<Vec<String>>();
-	// parse cli args for three options:
-	// - path for CSV
-	// - flag for separator `-s "|"` or `--separator ,`
-	// - -v, -V or --version
+	let cli_args = Args::parse(env::args().skip(1).collect::<Vec<String>>());
 
 	println!("Hello, world! {cli_args:?}");
 }
