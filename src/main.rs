@@ -1,5 +1,6 @@
 use std::env;
 
+pub mod coord;
 pub mod postfixcsv;
 
 fn main() {
