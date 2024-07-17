@@ -1,3 +1,5 @@
+use crate::coord::Coord;
+
 pub struct Postfixcsv {
-	sheet_size: Coord,
+	pub sheet_size: Coord,
 }

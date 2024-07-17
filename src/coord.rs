@@ -7,67 +7,31 @@ pub struct Coord {
 }
 
 impl Coord {
-	fn from_string(input: &str) -> Coord {
+	pub fn parse(input: &str) -> Coord {
 		let input = input.to_uppercase();
-		let mut column_string = String::new();
 		let mut row_string = String::new();
 
+		let mut column = 0;
 		for item in input.chars() {
 			if item.is_alphabetic() {
-				column_string.push(item);
+				let value = (item as u64) - ('A' as u64) + 1;
+				column = (26 * column) + value;
 			} else if item.is_numeric() {
 				row_string.push(item);
 			}
-		}
-
-		let mut column = 0;
-		for letter in column_string.chars() {
-			let value = (letter as u64) - ('A' as u64) + 1;
-			column = (26 * column) + value;
 		}
 
 		let row = row_string.parse::<u64>().unwrap_or(1);
 
 		Coord { column, row }
 	}
-}
 
-#[test]
-fn from_string_test() {
-	assert_eq!(Coord::from_string("A1"), Coord { column: 1, row: 1 });
-	assert_eq!(Coord::from_string("a1"), Coord { column: 1, row: 1 });
-	assert_eq!(Coord::from_string("a10"), Coord { column: 1, row: 10 });
-	assert_eq!(Coord::from_string("a510"), Coord { column: 1, row: 510 });
-	assert_eq!(Coord::from_string("a-1"), Coord { column: 1, row: 1 });
-	assert_eq!(Coord::from_string("a 5#"), Coord { column: 1, row: 5 });
-	assert_eq!(Coord::from_string("B2"), Coord { column: 2, row: 2 });
-	assert_eq!(Coord::from_string("Z2"), Coord { column: 26, row: 2 });
-	assert_eq!(Coord::from_string("AA2"), Coord { column: 27, row: 2 });
-	assert_eq!(Coord::from_string("AB2"), Coord { column: 28, row: 2 });
-	assert_eq!(Coord::from_string("AZ2"), Coord { column: 52, row: 2 });
-	assert_eq!(Coord::from_string("BA2"), Coord { column: 53, row: 2 });
-	assert_eq!(Coord::from_string("BZ2"), Coord { column: 78, row: 2 });
-	assert_eq!(Coord::from_string("CA2"), Coord { column: 79, row: 2 });
-	assert_eq!(Coord::from_string("ZA2"), Coord { column: 677, row: 2 });
-	assert_eq!(Coord::from_string("ZZ2"), Coord { column: 702, row: 2 });
-	assert_eq!(Coord::from_string("AAA2"), Coord { column: 703, row: 2 });
-	assert_eq!(Coord::from_string("AAB2"), Coord { column: 704, row: 2 });
-	assert_eq!(
-		Coord::from_string("ZZZ50"),
-		Coord {
-			column: 18_278,
-			row: 50
-		}
-	);
-}
-
-impl fmt::Display for Coord {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+	pub fn stringify(&self) -> String {
 		let mut result = Vec::new();
 		let mut column = self.column;
 
 		while column > 0 {
-			column -= 1; // Adjust for 1-based indexing
+			column -= 1;
 			let remainder = (column % 26) as u8;
 			let letter = (b'A' + remainder) as char;
 			result.push(letter);
@@ -76,7 +40,60 @@ impl fmt::Display for Coord {
 
 		result.reverse();
 
-		write!(f, "{}{}", result.into_iter().collect::<String>(), self.row)
+		format!("{}{}", result.iter().collect::<String>(), self.row)
+	}
+}
+
+#[test]
+fn parse_test() {
+	assert_eq!(Coord::parse("A1"), Coord { column: 1, row: 1 });
+	assert_eq!(Coord::parse("a1"), Coord { column: 1, row: 1 });
+	assert_eq!(Coord::parse("a10"), Coord { column: 1, row: 10 });
+	assert_eq!(Coord::parse("a510"), Coord { column: 1, row: 510 });
+	assert_eq!(Coord::parse("a-1"), Coord { column: 1, row: 1 });
+	assert_eq!(Coord::parse("b 5#"), Coord { column: 2, row: 5 });
+	assert_eq!(Coord::parse("B2"), Coord { column: 2, row: 2 });
+	assert_eq!(Coord::parse("Z2"), Coord { column: 26, row: 2 });
+	assert_eq!(Coord::parse("AA2"), Coord { column: 27, row: 2 });
+	assert_eq!(Coord::parse("AB2"), Coord { column: 28, row: 2 });
+	assert_eq!(Coord::parse("AZ2"), Coord { column: 52, row: 2 });
+	assert_eq!(Coord::parse("BA2"), Coord { column: 53, row: 2 });
+	assert_eq!(Coord::parse("BZ2"), Coord { column: 78, row: 2 });
+	assert_eq!(Coord::parse("CA2"), Coord { column: 79, row: 2 });
+	assert_eq!(Coord::parse("ZA2"), Coord { column: 677, row: 2 });
+	assert_eq!(Coord::parse("ZZ2"), Coord { column: 702, row: 2 });
+	assert_eq!(Coord::parse("AAA2"), Coord { column: 703, row: 2 });
+	assert_eq!(Coord::parse("AAB2"), Coord { column: 704, row: 2 });
+	assert_eq!(
+		Coord::parse("ZZZ50"),
+		Coord {
+			column: 18_278,
+			row: 50
+		}
+	);
+}
+
+#[test]
+fn stringify_test() {
+	assert_eq!(Coord { column: 1, row: 1 }.stringify(), String::from("A1"));
+	assert_eq!(Coord { column: 2, row: 2 }.stringify(), String::from("B2"));
+	assert_eq!(Coord { column: 26, row: 2 }.stringify(), String::from("Z2"));
+	assert_eq!(Coord { column: 27, row: 5 }.stringify(), String::from("AA5"));
+	assert_eq!(Coord { column: 702, row: 5 }.stringify(), String::from("ZZ5"));
+	assert_eq!(Coord { column: 703, row: 5 }.stringify(), String::from("AAA5"));
+	assert_eq!(
+		Coord {
+			column: 20_000,
+			row: 1000
+		}
+		.stringify(),
+		String::from("ACOF1000")
+	);
+}
+
+impl fmt::Display for Coord {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "{}", self.stringify())
 	}
 }
 
