@@ -42,6 +42,34 @@ impl Coord {
 
 		format!("{}{}", result.iter().collect::<String>(), self.row)
 	}
+
+	pub fn is_coord(item: &str) -> bool {
+		let mut has_letters = false;
+		let mut has_numbers = false;
+		let mut is_coord = true;
+
+		item.chars().for_each(|thing| {
+			if thing.is_alphabetic() {
+				has_letters = true;
+				if has_numbers {
+					is_coord = false;
+				}
+			}
+
+			if thing.is_numeric() {
+				has_numbers = true;
+				if !has_letters {
+					is_coord = false;
+				}
+			}
+		});
+
+		if !has_letters || !has_numbers {
+			false
+		} else {
+			is_coord
+		}
+	}
 }
 
 #[test]
@@ -89,6 +117,19 @@ fn stringify_test() {
 		.stringify(),
 		String::from("ACOF1000")
 	);
+}
+
+#[test]
+fn is_coord_test() {
+	assert_eq!(Coord::is_coord(&String::from("A1")), true);
+	assert_eq!(Coord::is_coord(&String::from("AA11")), true);
+	assert_eq!(Coord::is_coord(&String::from("ZZZZ1")), true);
+	assert_eq!(Coord::is_coord(&String::from("Z1234")), true);
+
+	assert_eq!(Coord::is_coord(&String::from("1")), false);
+	assert_eq!(Coord::is_coord(&String::from("A")), false);
+	assert_eq!(Coord::is_coord(&String::from("A1A")), false);
+	assert_eq!(Coord::is_coord(&String::from("1A1")), false);
 }
 
 impl fmt::Display for Coord {
