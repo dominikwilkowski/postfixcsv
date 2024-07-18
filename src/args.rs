@@ -34,7 +34,7 @@ impl Args {
 					}
 				},
 				_ => {
-					if !arg.starts_with("-") {
+					if !arg.starts_with('-') {
 						flags.csv_path.push(arg)
 					}
 				},
