@@ -2,8 +2,8 @@ use std::fmt;
 
 #[derive(Debug, PartialEq)]
 pub struct Coord {
-	column: u64,
-	row: u64,
+	pub column: usize,
+	pub row: usize,
 }
 
 impl Coord {
@@ -14,14 +14,14 @@ impl Coord {
 		let mut column = 0;
 		for item in input.chars() {
 			if item.is_alphabetic() {
-				let value = (item as u64) - ('A' as u64) + 1;
+				let value = (item as usize) - ('A' as usize) + 1;
 				column = (26 * column) + value;
 			} else if item.is_numeric() {
 				row_string.push(item);
 			}
 		}
 
-		let row = row_string.parse::<u64>().unwrap_or(1);
+		let row = row_string.parse::<usize>().unwrap_or(1);
 
 		Coord { column, row }
 	}
