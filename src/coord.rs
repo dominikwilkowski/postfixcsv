@@ -20,15 +20,16 @@ impl Coord {
 				row_string.push(item);
 			}
 		}
+		column -= 1;
 
-		let row = row_string.parse::<usize>().unwrap_or(1);
+		let row = row_string.parse::<usize>().unwrap_or(1) - 1;
 
 		Coord { column, row }
 	}
 
 	pub fn stringify(&self) -> String {
 		let mut result = Vec::new();
-		let mut column = self.column;
+		let mut column = self.column + 1;
 
 		while column > 0 {
 			column -= 1;
@@ -40,7 +41,7 @@ impl Coord {
 
 		result.reverse();
 
-		format!("{}{}", result.iter().collect::<String>(), self.row)
+		format!("{}{}", result.iter().collect::<String>(), self.row + 1)
 	}
 
 	pub fn is_coord(item: &str) -> bool {
@@ -74,48 +75,48 @@ impl Coord {
 
 #[test]
 fn parse_test() {
-	assert_eq!(Coord::parse("A1"), Coord { column: 1, row: 1 });
-	assert_eq!(Coord::parse("a1"), Coord { column: 1, row: 1 });
-	assert_eq!(Coord::parse("a10"), Coord { column: 1, row: 10 });
-	assert_eq!(Coord::parse("a510"), Coord { column: 1, row: 510 });
-	assert_eq!(Coord::parse("a-1"), Coord { column: 1, row: 1 });
-	assert_eq!(Coord::parse("b 5#"), Coord { column: 2, row: 5 });
-	assert_eq!(Coord::parse("B2"), Coord { column: 2, row: 2 });
-	assert_eq!(Coord::parse("Z2"), Coord { column: 26, row: 2 });
-	assert_eq!(Coord::parse("AA2"), Coord { column: 27, row: 2 });
-	assert_eq!(Coord::parse("AB2"), Coord { column: 28, row: 2 });
-	assert_eq!(Coord::parse("AZ2"), Coord { column: 52, row: 2 });
-	assert_eq!(Coord::parse("BA2"), Coord { column: 53, row: 2 });
-	assert_eq!(Coord::parse("BZ2"), Coord { column: 78, row: 2 });
-	assert_eq!(Coord::parse("CA2"), Coord { column: 79, row: 2 });
-	assert_eq!(Coord::parse("ZA2"), Coord { column: 677, row: 2 });
-	assert_eq!(Coord::parse("ZZ2"), Coord { column: 702, row: 2 });
-	assert_eq!(Coord::parse("AAA2"), Coord { column: 703, row: 2 });
-	assert_eq!(Coord::parse("AAB2"), Coord { column: 704, row: 2 });
+	assert_eq!(Coord::parse("A1"), Coord { column: 0, row: 0 });
+	assert_eq!(Coord::parse("a1"), Coord { column: 0, row: 0 });
+	assert_eq!(Coord::parse("a10"), Coord { column: 0, row: 9 });
+	assert_eq!(Coord::parse("a510"), Coord { column: 0, row: 509 });
+	assert_eq!(Coord::parse("a-1"), Coord { column: 0, row: 0 });
+	assert_eq!(Coord::parse("b 5#"), Coord { column: 1, row: 4 });
+	assert_eq!(Coord::parse("B2"), Coord { column: 1, row: 1 });
+	assert_eq!(Coord::parse("Z2"), Coord { column: 25, row: 1 });
+	assert_eq!(Coord::parse("AA2"), Coord { column: 26, row: 1 });
+	assert_eq!(Coord::parse("AB2"), Coord { column: 27, row: 1 });
+	assert_eq!(Coord::parse("AZ2"), Coord { column: 51, row: 1 });
+	assert_eq!(Coord::parse("BA2"), Coord { column: 52, row: 1 });
+	assert_eq!(Coord::parse("BZ2"), Coord { column: 77, row: 1 });
+	assert_eq!(Coord::parse("CA2"), Coord { column: 78, row: 1 });
+	assert_eq!(Coord::parse("ZA2"), Coord { column: 676, row: 1 });
+	assert_eq!(Coord::parse("ZZ2"), Coord { column: 701, row: 1 });
+	assert_eq!(Coord::parse("AAA2"), Coord { column: 702, row: 1 });
+	assert_eq!(Coord::parse("AAB2"), Coord { column: 703, row: 1 });
 	assert_eq!(
 		Coord::parse("ZZZ50"),
 		Coord {
-			column: 18_278,
-			row: 50
+			column: 18_277,
+			row: 49
 		}
 	);
 }
 
 #[test]
 fn stringify_test() {
-	assert_eq!(Coord { column: 1, row: 1 }.stringify(), String::from("A1"));
-	assert_eq!(Coord { column: 2, row: 2 }.stringify(), String::from("B2"));
-	assert_eq!(Coord { column: 26, row: 2 }.stringify(), String::from("Z2"));
-	assert_eq!(Coord { column: 27, row: 5 }.stringify(), String::from("AA5"));
-	assert_eq!(Coord { column: 702, row: 5 }.stringify(), String::from("ZZ5"));
-	assert_eq!(Coord { column: 703, row: 5 }.stringify(), String::from("AAA5"));
+	assert_eq!(Coord { column: 0, row: 0 }.stringify(), String::from("A1"));
+	assert_eq!(Coord { column: 1, row: 1 }.stringify(), String::from("B2"));
+	assert_eq!(Coord { column: 25, row: 1 }.stringify(), String::from("Z2"));
+	assert_eq!(Coord { column: 26, row: 4 }.stringify(), String::from("AA5"));
+	assert_eq!(Coord { column: 701, row: 4 }.stringify(), String::from("ZZ5"));
+	assert_eq!(Coord { column: 702, row: 4 }.stringify(), String::from("AAA5"));
 	assert_eq!(
 		Coord {
 			column: 20_000,
 			row: 1000
 		}
 		.stringify(),
-		String::from("ACOF1000")
+		String::from("ACOG1001")
 	);
 }
 
@@ -140,18 +141,18 @@ impl fmt::Display for Coord {
 
 #[test]
 fn to_string_test() {
-	assert_eq!(Coord { column: 1, row: 1 }.to_string(), String::from("A1"));
-	assert_eq!(Coord { column: 2, row: 2 }.to_string(), String::from("B2"));
-	assert_eq!(Coord { column: 26, row: 2 }.to_string(), String::from("Z2"));
-	assert_eq!(Coord { column: 27, row: 5 }.to_string(), String::from("AA5"));
-	assert_eq!(Coord { column: 702, row: 5 }.to_string(), String::from("ZZ5"));
-	assert_eq!(Coord { column: 703, row: 5 }.to_string(), String::from("AAA5"));
+	assert_eq!(Coord { column: 0, row: 0 }.to_string(), String::from("A1"));
+	assert_eq!(Coord { column: 1, row: 1 }.to_string(), String::from("B2"));
+	assert_eq!(Coord { column: 25, row: 1 }.to_string(), String::from("Z2"));
+	assert_eq!(Coord { column: 26, row: 4 }.to_string(), String::from("AA5"));
+	assert_eq!(Coord { column: 701, row: 4 }.to_string(), String::from("ZZ5"));
+	assert_eq!(Coord { column: 702, row: 4 }.to_string(), String::from("AAA5"));
 	assert_eq!(
 		Coord {
 			column: 20_000,
 			row: 1000
 		}
 		.to_string(),
-		String::from("ACOF1000")
+		String::from("ACOG1001")
 	);
 }
