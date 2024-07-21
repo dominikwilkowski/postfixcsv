@@ -2,10 +2,10 @@ use std::path::PathBuf;
 
 #[derive(Debug, PartialEq)]
 pub struct Args {
-	csv_path: PathBuf,
-	separator: String,
-	help: bool,
-	version: bool,
+	pub csv_path: PathBuf,
+	pub separator: String,
+	pub help: bool,
+	pub version: bool,
 }
 
 impl Args {
@@ -41,7 +41,7 @@ impl Args {
 			}
 		}
 
-		if flags.csv_path.as_path().components().count() == 0 {
+		if !(flags.help || flags.version) && flags.csv_path.as_path().components().count() == 0 {
 			panic!("Please specifiy the path to the csv to be parsed")
 		}
 
