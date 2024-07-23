@@ -23,6 +23,10 @@ impl Sheet {
 	pub fn get(&self, coord: Coord) -> Option<&String> {
 		self.data.get(coord.row).and_then(|cols| cols.get(coord.column))
 	}
+
+	pub fn get_mut(&mut self, coord: Coord) -> Option<&mut String> {
+		self.data.get_mut(coord.row).and_then(|cols| cols.get_mut(coord.column))
+	}
 }
 
 #[test]
@@ -71,6 +75,18 @@ fn get_test() {
 	assert_eq!(sheet.get(Coord { column: 2, row: 2 }), Some(&String::from("cellC3")));
 	assert_eq!(sheet.get(Coord { column: 0, row: 3 }), None);
 	assert_eq!(sheet.get(Coord { column: 3, row: 0 }), None);
+}
+
+#[test]
+fn get_mut_test() {
+	let mut sheet =
+		Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n"), String::from(","));
+
+	assert_eq!(sheet.get_mut(Coord { column: 0, row: 0 }), Some(&mut String::from("cellA1")));
+	assert_eq!(sheet.get_mut(Coord { column: 1, row: 1 }), Some(&mut String::from("cellB2")));
+	assert_eq!(sheet.get_mut(Coord { column: 2, row: 2 }), Some(&mut String::from("cellC3")));
+	assert_eq!(sheet.get_mut(Coord { column: 0, row: 3 }), None);
+	assert_eq!(sheet.get_mut(Coord { column: 3, row: 0 }), None);
 }
 
 pub struct SheetIterator<'a> {
