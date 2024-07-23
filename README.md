@@ -4,7 +4,7 @@ POSTFIX-CSV
 
 ## The task
 
-- Create a cli app that parses a csv file and outputs it's content
+- Create a cli app that parses a csv file and outputs its content
 - The spreadsheet should be able to support:
 	- [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) calculations
 		- Implement only the four most common operators: `+`,`-`,`/` and `*`

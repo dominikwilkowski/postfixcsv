@@ -1,14 +1,18 @@
+use std::fmt;
+
 use crate::coord::Coord;
 
 #[derive(Debug, PartialEq)]
 pub struct Sheet {
 	pub data: Vec<Vec<String>>,
+	pub separator: String,
 }
 
 impl Sheet {
 	pub fn new(input: String, separator: String) -> Self {
 		Self {
-			data: Self::parse(input, separator),
+			data: Self::parse(input, separator.clone()),
+			separator,
 		}
 	}
 
@@ -29,6 +33,19 @@ impl Sheet {
 	}
 }
 
+impl fmt::Display for Sheet {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		for (i, row) in self.data.iter().enumerate() {
+			if i > 0 {
+				writeln!(f)?;
+			}
+			let row_string = row.join(&self.separator);
+			write!(f, "{}", row_string)?;
+		}
+		Ok(())
+	}
+}
+
 #[test]
 fn parse_test() {
 	assert_eq!(
@@ -38,7 +55,8 @@ fn parse_test() {
 				vec![String::from("cellA1"), String::from("cellB1"), String::from("cellC1")],
 				vec![String::from("cellA2"), String::from("cellB2"), String::from("cellC2")],
 				vec![String::from("cellA3"), String::from("cellB3"), String::from("cellC3")],
-			]
+			],
+			separator: String::from(",")
 		}
 	);
 
@@ -49,7 +67,8 @@ fn parse_test() {
 				vec![String::from("cellA1"), String::from("cellB1"), String::from("cellC1")],
 				vec![String::from("cellA2"), String::from("cellB2"), String::from("cellC2")],
 				vec![String::from("cellA3"), String::from("cellB3"), String::from("cellC3")],
-			]
+			],
+			separator: String::from(",")
 		}
 	);
 
@@ -60,7 +79,8 @@ fn parse_test() {
 				vec![String::from("cellA1"), String::from("cellB1"), String::from("cellC1")],
 				vec![String::from("cellA2"), String::from("cellB2"), String::from("cellC2")],
 				vec![String::from("cellA3"), String::from("cellB3"), String::from("cellC3")],
-			]
+			],
+			separator: String::from("|")
 		}
 	);
 }
@@ -178,4 +198,20 @@ fn iterator_test() {
 			Coord { column: 1, row: 1 },
 		]
 	);
+}
+
+#[test]
+fn display_test() {
+	let sheet = Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2"), String::from(","));
+	assert_eq!(format!("{sheet}"), String::from("cellA1,cellB1,cellC1\ncellA2,cellB2"));
+
+	let sheet =
+		Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3"), String::from(","));
+	assert_eq!(format!("{sheet}"), String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3"));
+
+	let sheet = Sheet::new(String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2"), String::from(";"));
+	assert_eq!(format!("{sheet}"), String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2"));
+
+	let sheet = Sheet::new(String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2\n\n"), String::from(";"));
+	assert_eq!(format!("{sheet}"), String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2"));
 }
