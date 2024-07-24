@@ -110,7 +110,7 @@ impl<'a> Postfix<'a> {
 				}
 			}
 
-			if recursion_depth > 0 && (self.stack.len() > 1 || self.stack.is_empty()) {
+			if recursion_depth > 0 && self.stack.len() > 1 {
 				// we are inside a recursive call
 				Ok(*self.stack.last().unwrap())
 			} else if self.stack.len() > 1 {
