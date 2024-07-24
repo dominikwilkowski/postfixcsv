@@ -8,8 +8,9 @@ POSTFIX-CSV
 - The spreadsheet should be able to support:
 	- [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) calculations
 		- Implement only the four most common operators: `+`,`-`,`/` and `*`
-	- References to other cells via letter number notation (`A1` or `Z987`)
+	- References to other cells via letter number notation (`A1`, `BZ987` or `AAZ5`)
 		- Letters refer to columns, numbers to rows
+		- The letter system: `A`,`B`,`C`..`Z`,`AA`,`AB`,`AC`..`AZ`,`BA`,`BB`,`BC`..[]..`ZY`,`ZZ`,`AAA`,`AAB` etc…
 		- The coordinates start with 1 not zero
 - When errors are found, the output for that cell should be `#ERR`
 - You're not allowed to use any external packages (usage of standard library is allowed)

@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Coord {
 	pub column: usize,
 	pub row: usize,
@@ -12,14 +12,14 @@ impl Coord {
 		let mut row_string = String::new();
 
 		let mut column = 0;
-		for item in input.chars() {
+		input.chars().for_each(|item| {
 			if item.is_alphabetic() {
 				let value = (item as usize) - ('A' as usize) + 1;
 				column = (26 * column) + value;
 			} else if item.is_numeric() {
 				row_string.push(item);
 			}
-		}
+		});
 		column -= 1;
 
 		let row = row_string.parse::<usize>().unwrap_or(1) - 1;
@@ -49,23 +49,26 @@ impl Coord {
 		let mut has_numbers = false;
 		let mut is_coord = true;
 
-		item.chars().for_each(|thing| {
-			if thing.is_alphabetic() {
+		for thing in item.chars() {
+			if thing.is_ascii_alphabetic() {
 				has_letters = true;
 				if has_numbers {
 					is_coord = false;
+					break;
 				}
-			}
-
-			if thing.is_numeric() {
+			} else if thing.is_ascii_digit() {
 				has_numbers = true;
 				if !has_letters {
 					is_coord = false;
+					break;
 				}
+			} else {
+				is_coord = false;
+				break;
 			}
-		});
+		}
 
-		if !has_letters || !has_numbers {
+		if has_letters ^ has_numbers {
 			false
 		} else {
 			is_coord
@@ -100,6 +103,13 @@ fn parse_test() {
 			row: 49
 		}
 	);
+	assert_eq!(
+		Coord::parse("FZZ123412021312"),
+		Coord {
+			column: 4_757,
+			row: 123_412_021_311
+		}
+	);
 }
 
 #[test]
@@ -122,15 +132,20 @@ fn stringify_test() {
 
 #[test]
 fn is_coord_test() {
-	assert_eq!(Coord::is_coord(&String::from("A1")), true);
-	assert_eq!(Coord::is_coord(&String::from("AA11")), true);
-	assert_eq!(Coord::is_coord(&String::from("ZZZZ1")), true);
-	assert_eq!(Coord::is_coord(&String::from("Z1234")), true);
+	assert_eq!(Coord::is_coord("A1"), true);
+	assert_eq!(Coord::is_coord("AA11"), true);
+	assert_eq!(Coord::is_coord("ZZZZ1"), true);
+	assert_eq!(Coord::is_coord("Z1234"), true);
+	assert_eq!(Coord::is_coord("a1"), true);
 
-	assert_eq!(Coord::is_coord(&String::from("1")), false);
-	assert_eq!(Coord::is_coord(&String::from("A")), false);
-	assert_eq!(Coord::is_coord(&String::from("A1A")), false);
-	assert_eq!(Coord::is_coord(&String::from("1A1")), false);
+	assert_eq!(Coord::is_coord("1"), false);
+	assert_eq!(Coord::is_coord("A"), false);
+	assert_eq!(Coord::is_coord("A1A"), false);
+	assert_eq!(Coord::is_coord("1A1"), false);
+	assert_eq!(Coord::is_coord("A1A1"), false);
+	assert_eq!(Coord::is_coord("AAA123.123"), false);
+	assert_eq!(Coord::is_coord("A 1"), false);
+	assert_eq!(Coord::is_coord("AB2/3"), false);
 }
 
 impl fmt::Display for Coord {
@@ -141,18 +156,20 @@ impl fmt::Display for Coord {
 
 #[test]
 fn to_string_test() {
-	assert_eq!(Coord { column: 0, row: 0 }.to_string(), String::from("A1"));
-	assert_eq!(Coord { column: 1, row: 1 }.to_string(), String::from("B2"));
-	assert_eq!(Coord { column: 25, row: 1 }.to_string(), String::from("Z2"));
-	assert_eq!(Coord { column: 26, row: 4 }.to_string(), String::from("AA5"));
-	assert_eq!(Coord { column: 701, row: 4 }.to_string(), String::from("ZZ5"));
-	assert_eq!(Coord { column: 702, row: 4 }.to_string(), String::from("AAA5"));
+	assert_eq!(format!("{}", Coord { column: 0, row: 0 }), String::from("A1"));
+	assert_eq!(format!("{}", Coord { column: 1, row: 1 }), String::from("B2"));
+	assert_eq!(format!("{}", Coord { column: 25, row: 1 }), String::from("Z2"));
+	assert_eq!(format!("{}", Coord { column: 26, row: 4 }), String::from("AA5"));
+	assert_eq!(format!("{}", Coord { column: 701, row: 4 }), String::from("ZZ5"));
+	assert_eq!(format!("{}", Coord { column: 702, row: 4 }), String::from("AAA5"));
 	assert_eq!(
-		Coord {
-			column: 20_000,
-			row: 1000
-		}
-		.to_string(),
+		format!(
+			"{}",
+			Coord {
+				column: 20_000,
+				row: 1000
+			}
+		),
 		String::from("ACOG1001")
 	);
 }
