@@ -1,9 +1,10 @@
-use std::path::PathBuf;
+use std::{env, path::PathBuf, process};
 
 #[derive(Debug, PartialEq)]
 pub struct Args {
 	pub csv_path: PathBuf,
 	pub separator: String,
+	pub out_path: Option<PathBuf>,
 	pub help: bool,
 	pub version: bool,
 }
@@ -13,6 +14,7 @@ impl Args {
 		let mut flags = Self {
 			csv_path: PathBuf::new(),
 			separator: String::from(","),
+			out_path: None,
 			help: false,
 			version: false,
 		};
@@ -30,7 +32,18 @@ impl Args {
 					if let Some(next_arg) = iter.next() {
 						flags.separator.clone_from(next_arg);
 					} else {
-						panic!("The flag `--separator` is missing it's argument to specifiy what the separator is")
+						eprintln!("The flag `--separator` is missing its argument to specifiy what the separator is");
+						process::exit(1);
+					}
+				},
+				"-o" | "--out" => {
+					if let Some(next_arg) = iter.next() {
+						let mut out_path = PathBuf::new();
+						out_path.push(next_arg);
+						flags.out_path = Some(out_path);
+					} else {
+						eprintln!("The flag `--out` is missing its argument to specifiy where to save the output to");
+						process::exit(1);
 					}
 				},
 				_ => {
@@ -42,10 +55,19 @@ impl Args {
 		}
 
 		if !(flags.help || flags.version) && flags.csv_path.as_path().components().count() == 0 {
-			panic!("Please specifiy the path to the csv to be parsed")
+			eprintln!("Please specifiy the path to the csv to be parsed");
+			process::exit(1);
 		}
 
 		flags
+	}
+
+	pub fn help() -> String {
+		format!("{name} v{version}\n\nUsage: $ {name} [path/to/csv] [OPTIONS]\n\nOptions:\n  -V, --version        Print version info and exit\n  -h, --help           Print help and exit\n  -s, --separator \".\"  Set the separator for the CSV\n", name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"))
+	}
+
+	pub fn version() -> String {
+		format!("v{}", env!("CARGO_PKG_VERSION"))
 	}
 }
 
@@ -56,6 +78,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: false,
 			version: false,
 		}
@@ -65,6 +88,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: false,
 			version: true,
 		}
@@ -74,6 +98,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: false,
 			version: true,
 		}
@@ -83,6 +108,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: false,
 			version: true,
 		}
@@ -92,6 +118,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: true,
 			version: false,
 		}
@@ -101,6 +128,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: true,
 			version: false,
 		}
@@ -110,6 +138,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: false,
 			version: false,
 		}
@@ -119,6 +148,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from(","),
+			out_path: None,
 			help: false,
 			version: false,
 		}
@@ -128,6 +158,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from("."),
+			out_path: None,
 			help: false,
 			version: false,
 		}
@@ -141,6 +172,35 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from("."),
+			out_path: None,
+			help: false,
+			version: false,
+		}
+	);
+	assert_eq!(
+		Args::parse(vec![
+			String::from("path/to/somehwere"),
+			String::from("-o"),
+			String::from("path/to")
+		]),
+		Args {
+			csv_path: PathBuf::from("path/to/somehwere"),
+			separator: String::from(","),
+			out_path: Some(PathBuf::from("path/to")),
+			help: false,
+			version: false,
+		}
+	);
+	assert_eq!(
+		Args::parse(vec![
+			String::from("path/to/somehwere"),
+			String::from("--out"),
+			String::from("path/to")
+		]),
+		Args {
+			csv_path: PathBuf::from("path/to/somehwere"),
+			separator: String::from(","),
+			out_path: Some(PathBuf::from("path/to")),
 			help: false,
 			version: false,
 		}
@@ -151,18 +211,23 @@ fn parse_test() {
 			String::from("path/to/somehwere"),
 			String::from("-s"),
 			String::from("..."),
+			String::from("-o"),
+			String::from("path/to"),
 			String::from("-w"),
 			String::from("-h"),
 		]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from("..."),
+			out_path: Some(PathBuf::from("path/to")),
 			help: true,
 			version: true,
 		}
 	);
 	assert_eq!(
 		Args::parse(vec![
+			String::from("-o"),
+			String::from("path/to"),
 			String::from("-v"),
 			String::from("-s"),
 			String::from("..."),
@@ -173,6 +238,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
 			separator: String::from("..."),
+			out_path: Some(PathBuf::from("path/to")),
 			help: true,
 			version: true,
 		}
@@ -181,6 +247,8 @@ fn parse_test() {
 		Args::parse(vec![
 			String::from("path/to/somehwere"),
 			String::from("--version"),
+			String::from("--out"),
+			String::from("path/to"),
 			String::from("--help"),
 			String::from("--separator"),
 			String::from("..."),
@@ -190,6 +258,7 @@ fn parse_test() {
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere/path/to/elsewhere"),
 			separator: String::from("..."),
+			out_path: Some(PathBuf::from("path/to")),
 			help: true,
 			version: true,
 		}
@@ -197,24 +266,21 @@ fn parse_test() {
 }
 
 #[test]
-#[should_panic]
-fn parse_test_panic() {
-	assert_eq!(
-		Args::parse(vec![]),
-		Args {
-			csv_path: PathBuf::new(),
-			separator: String::from(","),
-			help: false,
-			version: false,
-		}
-	);
-	assert_eq!(
-		Args::parse(vec![String::from("path/to/somehwere"), String::from("-s"),]),
-		Args {
-			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from("..."),
-			help: false,
-			version: true,
-		}
-	);
+fn parse_test_failiure() {
+	let output = std::process::Command::new("cargo").args(&["run", "--"]).output().unwrap();
+	assert!(!output.status.success());
+	assert!(String::from_utf8_lossy(&output.stderr).contains("Please specifiy the path to the csv to be parsed"));
+	assert!(String::from_utf8_lossy(&output.stdout).is_empty());
+
+	let output = std::process::Command::new("cargo").args(&["run", "--", "path/to/somehwere", "-s"]).output().unwrap();
+	assert!(!output.status.success());
+	assert!(String::from_utf8_lossy(&output.stderr)
+		.contains("The flag `--separator` is missing its argument to specifiy what the separator is"));
+	assert!(String::from_utf8_lossy(&output.stdout).is_empty());
+
+	let output = std::process::Command::new("cargo").args(&["run", "--", "path/to/somehwere", "-o"]).output().unwrap();
+	assert!(!output.status.success());
+	assert!(String::from_utf8_lossy(&output.stderr)
+		.contains("The flag `--out` is missing its argument to specifiy where to save the output to"));
+	assert!(String::from_utf8_lossy(&output.stdout).is_empty());
 }
