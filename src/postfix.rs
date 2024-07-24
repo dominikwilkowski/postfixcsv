@@ -63,7 +63,7 @@ impl<'a> Postfix<'a> {
 						Err(err) => return Err(err),
 					}
 				} else {
-					&item
+					item
 				};
 
 				match cell.as_str() {

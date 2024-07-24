@@ -39,7 +39,7 @@ impl<'a> fmt::Display for Sheet<'a> {
 			if i > 0 {
 				writeln!(f)?;
 			}
-			let row_string = row.join(&self.separator);
+			let row_string = row.join(self.separator);
 			write!(f, "{}", row_string)?;
 		}
 		Ok(())
