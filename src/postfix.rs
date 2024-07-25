@@ -44,98 +44,101 @@ impl<'a> Postfix<'a> {
 		input.trim().to_string().split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>()
 	}
 
-	pub fn calc_cell(&mut self, coord: &Coord, recursion_depth: u8) -> Result<f64, PostfixError> {
+	pub fn calc_cell(&self, cell: &str, recursion_depth: u8) -> Result<f64, PostfixError> {
+		let mut stack = Vec::new();
+
 		if recursion_depth == 255 {
 			return Err(PostfixError::RecursionDepthExceeded);
-		} else if recursion_depth == 0 {
-			self.stack.clear();
 		}
 
-		if let Some(cell) = self.sheet.get(coord) {
-			let cell = Self::sanatize_input(cell);
+		let cell = Self::sanatize_input(cell);
 
-			for item in &cell {
-				let cell = if Coord::is_coord(item) {
-					let coord = Coord::parse(item);
-					let calc_result = self.calc_cell(&coord, recursion_depth + 1);
-					match calc_result {
-						Ok(value) => &value.to_string(),
-						Err(err) => return Err(err),
-					}
-				} else {
-					item
-				};
+		for item in &cell {
+			let cell = if Coord::is_coord(item) {
+				let cell_value;
+				let coord = Coord::parse(item);
 
-				match cell.as_str() {
-					"+" => {
-						let (a, b) = (self.stack.pop(), self.stack.pop());
-						if let (Some(a), Some(b)) = (a, b) {
-							self.stack.push(b + a);
-						} else {
-							return Err(PostfixError::NotEnoughOperands);
-						}
+				match self.sheet.get(&coord) {
+					Some(contents) => {
+						match self.calc_cell(contents, recursion_depth + 1) {
+							Ok(calc_cell) => cell_value = calc_cell,
+							Err(error) => return Err(error),
+						};
 					},
-					"-" => {
-						let (a, b) = (self.stack.pop(), self.stack.pop());
-						if let (Some(a), Some(b)) = (a, b) {
-							self.stack.push(b - a);
-						} else {
-							return Err(PostfixError::NotEnoughOperands);
-						}
-					},
-					"*" => {
-						let (a, b) = (self.stack.pop(), self.stack.pop());
-						if let (Some(a), Some(b)) = (a, b) {
-							self.stack.push(b * a);
-						} else {
-							return Err(PostfixError::NotEnoughOperands);
-						}
-					},
-					"/" => {
-						let (a, b) = (self.stack.pop(), self.stack.pop());
-						if let (Some(a), Some(b)) = (a, b) {
-							if a == 0.0 {
-								return Err(PostfixError::DivisionByZero);
-							}
-							self.stack.push(b / a);
-						} else {
-							return Err(PostfixError::NotEnoughOperands);
-						}
-					},
-					_ => {
-						if let Ok(operand) = item.parse::<f64>() {
-							self.stack.push(operand);
-						}
-					},
+					None => return Err(PostfixError::CellNotFound),
 				}
-			}
-
-			if recursion_depth > 0 && self.stack.len() > 1 {
-				// we are inside a recursive call
-				Ok(*self.stack.last().unwrap())
-			} else if self.stack.len() > 1 {
-				Err(PostfixError::TooManyOperands)
-			} else if self.stack.is_empty() {
-				Err(PostfixError::NotEnoughOperands)
+				&cell_value.to_string()
 			} else {
-				Ok(self.stack[0])
+				item
+			};
+
+			match cell.as_str() {
+				"+" => {
+					let (a, b) = (stack.pop(), stack.pop());
+					if let (Some(a), Some(b)) = (a, b) {
+						stack.push(b + a);
+					} else {
+						return Err(PostfixError::NotEnoughOperands);
+					}
+				},
+				"-" => {
+					let (a, b) = (stack.pop(), stack.pop());
+					if let (Some(a), Some(b)) = (a, b) {
+						stack.push(b - a);
+					} else {
+						return Err(PostfixError::NotEnoughOperands);
+					}
+				},
+				"*" => {
+					let (a, b) = (stack.pop(), stack.pop());
+					if let (Some(a), Some(b)) = (a, b) {
+						stack.push(b * a);
+					} else {
+						return Err(PostfixError::NotEnoughOperands);
+					}
+				},
+				"/" => {
+					let (a, b) = (stack.pop(), stack.pop());
+					if let (Some(a), Some(b)) = (a, b) {
+						if a == 0.0 {
+							return Err(PostfixError::DivisionByZero);
+						}
+						stack.push(b / a);
+					} else {
+						return Err(PostfixError::NotEnoughOperands);
+					}
+				},
+				_ => {
+					if let Ok(operand) = cell.parse::<f64>() {
+						stack.push(operand);
+					}
+				},
 			}
+		}
+
+		if recursion_depth > 0 && stack.len() == 1 {
+			// we are inside a recursive call
+			Ok(*stack.last().unwrap())
+		} else if stack.len() > 1 {
+			Err(PostfixError::TooManyOperands)
+		} else if stack.is_empty() {
+			Err(PostfixError::NotEnoughOperands)
 		} else {
-			Err(PostfixError::CellNotFound)
+			Ok(stack[0])
 		}
 	}
 
 	pub fn process_sheet(&mut self) {
-		let sheet_coords = self.sheet.iter().collect::<Vec<Coord>>();
+		for row in 0..self.sheet.data.len() {
+			for col in 0..self.sheet.data[row].len() {
+				let cell = &self.sheet.data[row][col];
 
-		for cell_coord in sheet_coords {
-			let value = match self.calc_cell(&cell_coord, 0) {
-				Ok(result) => format!("{result}"),
-				Err(error) => format!("{error}"),
-			};
+				let value = match self.calc_cell(cell, 0) {
+					Ok(result) => result.to_string(),
+					Err(error) => error.to_string(),
+				};
 
-			if let Some(cell) = self.sheet.get_mut(&cell_coord) {
-				*cell = value;
+				self.sheet.data[row][col] = value;
 			}
 		}
 	}
@@ -162,85 +165,83 @@ fn new_test() {
 fn calc_cell_test() {
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from(" 2    3 + ")]],
+			data: Vec::new(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell(" 2    3 + ", 0),
 		Ok(5.0)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("2 3 +")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("2 3 +", 0),
 		Ok(5.0)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("2 5 3 * -")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("2 5 3 * -", 0),
 		Ok(-13.0)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("6 2 /")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("6 2 /", 0),
 		Ok(3.0)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from(
-				"          8 ? 19.5 # 6  / : * 3  1.5  14 - +      * "
-			)]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("          8 ? 19.5 # 6  / : * 3  1.5  14 - +      * ", 0),
 		Ok(-247.0)
 	);
 
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("6 /")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("6 /", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("62/")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("62/", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("6 2 / +")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("6 2 / +", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("6 /")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("6 /", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("?")]],
+			data: Vec::new(),
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("?", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 
@@ -249,7 +250,7 @@ fn calc_cell_test() {
 			data: vec![vec![String::from("5"), String::from("A1 2 +")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("A1 2 +", 0),
 		Ok(7.0)
 	);
 	assert_eq!(
@@ -257,7 +258,7 @@ fn calc_cell_test() {
 			data: vec![vec![String::from("5"), String::from("A1 C1 +"), String::from("2")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("A1 C1 +", 0),
 		Ok(7.0)
 	);
 
@@ -275,7 +276,7 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 0, row: 0 }, 0),
+		.calc_cell("B1 B2 +", 0),
 		Ok(-8.0)
 	);
 	assert_eq!(
@@ -283,7 +284,7 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("2 B2 3 * -", 0),
 		Ok(-13.0)
 	);
 	assert_eq!(
@@ -291,7 +292,7 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 2, row: 0 }, 0),
+		.calc_cell("+", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 
@@ -300,7 +301,7 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 0, row: 1 }, 0),
+		.calc_cell("A1", 0),
 		Ok(-8.0)
 	);
 	assert_eq!(
@@ -308,7 +309,7 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 1, row: 1 }, 0),
+		.calc_cell("5", 0),
 		Ok(5.0)
 	);
 	assert_eq!(
@@ -316,7 +317,7 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 2, row: 1 }, 0),
+		.calc_cell("7 2 /", 0),
 		Ok(3.5)
 	);
 
@@ -325,7 +326,7 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 0, row: 2 }, 0),
+		.calc_cell("C2 3 *", 0),
 		Ok(10.5)
 	);
 	assert_eq!(
@@ -333,25 +334,26 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell(&Coord { column: 1, row: 2 }, 0),
+		.calc_cell("1 2", 0),
 		Err(PostfixError::TooManyOperands)
 	);
-	assert_eq!(Postfix::new(&mut Sheet { data, separator: "," }).calc_cell(&Coord { column: 2, row: 2 }, 0), Ok(14.0));
+	assert_eq!(Postfix::new(&mut Sheet { data, separator: "," }).calc_cell("5 1 2 + 4 * + 3 -", 0), Ok(14.0));
 
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: vec![vec![String::from("B1"), String::from("A1 C1 +"), String::from("2")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("A1 C1 +", 0),
 		Err(PostfixError::RecursionDepthExceeded)
 	);
+
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: vec![vec![String::from("5 5"), String::from("5 C1 +"), String::from("A1")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("5 C1 +", 0),
 		Err(PostfixError::TooManyOperands)
 	);
 	assert_eq!(
@@ -359,7 +361,7 @@ fn calc_cell_test() {
 			data: vec![vec![String::from("5"), String::from("D1 C1 +"), String::from("A1")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("D1 C1 +", 0),
 		Err(PostfixError::CellNotFound)
 	);
 	assert_eq!(
@@ -367,7 +369,7 @@ fn calc_cell_test() {
 			data: vec![vec![String::from("5"), String::from("A2 C1 +"), String::from("A1")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("A2 C1 +", 0),
 		Err(PostfixError::CellNotFound)
 	);
 	assert_eq!(
@@ -375,7 +377,7 @@ fn calc_cell_test() {
 			data: vec![vec![String::from("5 -"), String::from("4 C1 +"), String::from("A1")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("4 C1 +", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 	assert_eq!(
@@ -383,33 +385,32 @@ fn calc_cell_test() {
 			data: vec![vec![String::from("0"), String::from("4 C1 /"), String::from("A1")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
+		.calc_cell("4 C1 /", 0),
 		Err(PostfixError::DivisionByZero)
 	);
 
-	// A quirk I'll call a "feature", not a "bug"
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: vec![vec![String::from("5"), String::from("A1 C1 + +"), String::from("A1 1")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
-		Ok(11.0)
+		.calc_cell("A1 C1 + +", 0),
+		Err(PostfixError::TooManyOperands)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: vec![vec![String::from("5"), String::from("A1 5 1 C1"), String::from("+ +")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 1, row: 0 }, 0),
-		Ok(11.0)
+		.calc_cell("A1 5 1 C1", 0),
+		Err(PostfixError::NotEnoughOperands)
 	);
 	assert_eq!(
 		Postfix::new(&mut Sheet {
-			data: vec![vec![String::from("5"), String::from("A1 5 1 B1"), String::from("+ +")]],
+			data: vec![vec![String::from("5"), String::from("A1 5 1 C1"), String::from("+ +")]],
 			separator: ",",
 		})
-		.calc_cell(&Coord { column: 2, row: 0 }, 0),
+		.calc_cell("A1 5 1 C1", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
 }
