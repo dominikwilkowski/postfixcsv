@@ -131,25 +131,19 @@ impl<'a> IntoIterator for &'a Sheet<'a> {
 }
 
 impl<'a> Iterator for SheetIterator<'a> {
-	type Item = Coord;
+	type Item = &'a str;
 
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.row_index < self.sheet.data.len() && self.col_index < self.sheet.data[self.row_index].len() {
-			let coords = Coord {
-				column: self.col_index,
-				row: self.row_index,
-			};
+			let cell = &self.sheet.data[self.row_index][self.col_index];
 			self.col_index += 1;
-			Some(coords)
+			Some(cell)
 		} else if self.col_index == self.sheet.data[self.row_index].len() && self.row_index < self.sheet.data.len() - 1 {
 			self.row_index += 1;
 			self.col_index = 0;
-			let coords = Coord {
-				column: self.col_index,
-				row: self.row_index,
-			};
+			let cell = &self.sheet.data[self.row_index][self.col_index];
 			self.col_index += 1;
-			Some(coords)
+			Some(cell)
 		} else {
 			None
 		}
@@ -160,22 +154,22 @@ impl<'a> Iterator for SheetIterator<'a> {
 fn iterator_test() {
 	let sheet = Sheet::new(String::from("cellA1,cellB1,cellC1"), ",");
 	let mut sheet_iter = sheet.iter();
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 0, row: 0 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 1, row: 0 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 2, row: 0 }));
+	assert_eq!(sheet_iter.next(), Some("cellA1"));
+	assert_eq!(sheet_iter.next(), Some("cellB1"));
+	assert_eq!(sheet_iter.next(), Some("cellC1"));
 	assert_eq!(sheet_iter.next(), None);
 
 	let sheet = Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n"), ",");
 	let mut sheet_iter = sheet.iter();
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 0, row: 0 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 1, row: 0 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 2, row: 0 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 0, row: 1 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 1, row: 1 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 2, row: 1 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 0, row: 2 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 1, row: 2 }));
-	assert_eq!(sheet_iter.next(), Some(Coord { column: 2, row: 2 }));
+	assert_eq!(sheet_iter.next(), Some("cellA1"));
+	assert_eq!(sheet_iter.next(), Some("cellB1"));
+	assert_eq!(sheet_iter.next(), Some("cellC1"));
+	assert_eq!(sheet_iter.next(), Some("cellA2"));
+	assert_eq!(sheet_iter.next(), Some("cellB2"));
+	assert_eq!(sheet_iter.next(), Some("cellC2"));
+	assert_eq!(sheet_iter.next(), Some("cellA3"));
+	assert_eq!(sheet_iter.next(), Some("cellB3"));
+	assert_eq!(sheet_iter.next(), Some("cellC3"));
 	assert_eq!(sheet_iter.next(), None);
 
 	let sheet = Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2"), ",");
@@ -183,16 +177,7 @@ fn iterator_test() {
 	for cell in &sheet {
 		cells.push(cell);
 	}
-	assert_eq!(
-		cells,
-		vec![
-			Coord { column: 0, row: 0 },
-			Coord { column: 1, row: 0 },
-			Coord { column: 2, row: 0 },
-			Coord { column: 0, row: 1 },
-			Coord { column: 1, row: 1 },
-		]
-	);
+	assert_eq!(cells, vec!["cellA1", "cellB1", "cellC1", "cellA2", "cellB2",]);
 }
 
 #[test]
