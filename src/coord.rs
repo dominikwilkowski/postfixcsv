@@ -41,7 +41,7 @@ impl Coord {
 
 		result.reverse();
 
-		format!("{}{}", result.iter().collect::<String>(), self.row + 1)
+		result.iter().collect::<String>() + &(self.row + 1).to_string()
 	}
 
 	pub fn is_coord(item: &str) -> bool {

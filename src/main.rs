@@ -55,7 +55,7 @@ fn main() -> Result<()> {
 				eprintln!("Path for output file already exists {out_path:?}");
 				process::exit(1);
 			} else {
-				match write_from_string(out_path.clone(), format!("{}", postfix.sheet)) {
+				match write_from_string(out_path.clone(), postfix.sheet.to_string()) {
 					Ok(()) => println!("File successfully written to {out_path:?}\nTime: {:#?}", time.elapsed()),
 					Err(error) => {
 						eprintln!("Failed to write file to {out_path:?}.\n{error}");

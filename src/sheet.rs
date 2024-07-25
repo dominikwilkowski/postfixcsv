@@ -35,13 +35,11 @@ impl<'a> Sheet<'a> {
 
 impl<'a> fmt::Display for Sheet<'a> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		for (i, row) in self.data.iter().enumerate() {
-			if i > 0 {
-				writeln!(f)?;
-			}
-			let row_string = row.join(self.separator);
-			write!(f, "{}", row_string)?;
+		let mut vec = Vec::new();
+		for row in &self.data {
+			vec.push(row.join(self.separator));
 		}
+		write!(f, "{}", vec.join("\n"))?;
 		Ok(())
 	}
 }
