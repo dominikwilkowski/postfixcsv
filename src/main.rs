@@ -51,7 +51,7 @@ fn main() -> Result<()> {
 				out_path.push("postfix_out.csv");
 			}
 
-			if out_path.exists() {
+			if out_path.exists() && !cli_args.overwrite {
 				eprintln!("Path for output file already exists {out_path:?}");
 				process::exit(1);
 			} else {
