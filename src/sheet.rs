@@ -17,9 +17,8 @@ impl<'a> Sheet<'a> {
 	}
 
 	fn parse(input: String, separator: &str) -> Vec<Vec<String>> {
-		let input = input.replace("\r\n", "\n").replace('\r', "\n").trim().to_string();
 		input
-			.split('\n')
+			.lines()
 			.map(|line| line.split(&separator).map(|s| s.to_string()).collect::<Vec<String>>())
 			.collect::<Vec<Vec<String>>>()
 	}

@@ -41,7 +41,7 @@ impl<'a> Postfix<'a> {
 	}
 
 	fn sanatize_input(input: &str) -> Vec<String> {
-		input.trim().to_string().split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>()
+		input.trim().split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>()
 	}
 
 	pub fn calc_cell(&self, cell: &str, recursion_depth: u8) -> Result<f64, PostfixError> {
@@ -54,65 +54,61 @@ impl<'a> Postfix<'a> {
 		let cell = Self::sanatize_input(cell);
 
 		for item in &cell {
-			let cell = if Coord::is_coord(item) {
-				let cell_value;
+			if Coord::is_coord(item) {
 				let coord = Coord::parse(item);
 
 				match self.sheet.get(&coord) {
 					Some(contents) => {
 						match self.calc_cell(contents, recursion_depth + 1) {
-							Ok(calc_cell) => cell_value = calc_cell,
+							Ok(calc_cell) => stack.push(calc_cell),
 							Err(error) => return Err(error),
 						};
 					},
 					None => return Err(PostfixError::CellNotFound),
 				}
-				&cell_value.to_string()
 			} else {
-				item
-			};
-
-			match cell.as_str() {
-				"+" => {
-					let (a, b) = (stack.pop(), stack.pop());
-					if let (Some(a), Some(b)) = (a, b) {
-						stack.push(b + a);
-					} else {
-						return Err(PostfixError::NotEnoughOperands);
-					}
-				},
-				"-" => {
-					let (a, b) = (stack.pop(), stack.pop());
-					if let (Some(a), Some(b)) = (a, b) {
-						stack.push(b - a);
-					} else {
-						return Err(PostfixError::NotEnoughOperands);
-					}
-				},
-				"*" => {
-					let (a, b) = (stack.pop(), stack.pop());
-					if let (Some(a), Some(b)) = (a, b) {
-						stack.push(b * a);
-					} else {
-						return Err(PostfixError::NotEnoughOperands);
-					}
-				},
-				"/" => {
-					let (a, b) = (stack.pop(), stack.pop());
-					if let (Some(a), Some(b)) = (a, b) {
-						if a == 0.0 {
-							return Err(PostfixError::DivisionByZero);
+				match item.as_str() {
+					"+" => {
+						let (a, b) = (stack.pop(), stack.pop());
+						if let (Some(a), Some(b)) = (a, b) {
+							stack.push(b + a);
+						} else {
+							return Err(PostfixError::NotEnoughOperands);
 						}
-						stack.push(b / a);
-					} else {
-						return Err(PostfixError::NotEnoughOperands);
-					}
-				},
-				_ => {
-					if let Ok(operand) = cell.parse::<f64>() {
-						stack.push(operand);
-					}
-				},
+					},
+					"-" => {
+						let (a, b) = (stack.pop(), stack.pop());
+						if let (Some(a), Some(b)) = (a, b) {
+							stack.push(b - a);
+						} else {
+							return Err(PostfixError::NotEnoughOperands);
+						}
+					},
+					"*" => {
+						let (a, b) = (stack.pop(), stack.pop());
+						if let (Some(a), Some(b)) = (a, b) {
+							stack.push(b * a);
+						} else {
+							return Err(PostfixError::NotEnoughOperands);
+						}
+					},
+					"/" => {
+						let (a, b) = (stack.pop(), stack.pop());
+						if let (Some(a), Some(b)) = (a, b) {
+							if a == 0.0 {
+								return Err(PostfixError::DivisionByZero);
+							}
+							stack.push(b / a);
+						} else {
+							return Err(PostfixError::NotEnoughOperands);
+						}
+					},
+					_ => {
+						if let Ok(operand) = item.parse::<f64>() {
+							stack.push(operand);
+						}
+					},
+				}
 			}
 		}
 
