@@ -18,6 +18,7 @@ impl<'a> Sheet<'a> {
 
 	fn parse(input: String, separator: &str) -> Vec<Vec<String>> {
 		input
+			.trim()
 			.lines()
 			.map(|line| line.split(&separator).map(|s| s.to_string()).collect::<Vec<String>>())
 			.collect::<Vec<Vec<String>>>()
@@ -54,7 +55,7 @@ fn parse_test() {
 	);
 
 	assert_eq!(
-		Sheet::new(String::from("cellA1,cellB1,cellC1\r\ncellA2,cellB2,cellC2\rcellA3,cellB3,cellC3\n"), ","),
+		Sheet::new(String::from("cellA1,cellB1,cellC1\r\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n"), ","),
 		Sheet {
 			data: vec![
 				vec![String::from("cellA1"), String::from("cellB1"), String::from("cellC1")],
