@@ -41,9 +41,9 @@ fn main() -> Result<()> {
 			Err(error) => return Err(error),
 		};
 
-		let mut sheet = Sheet::new(csv, cli_args.separator.as_str());
-		let mut postfix = Postfix::new(&mut sheet);
-		postfix.process_sheet();
+		let mut sheet = Sheet::new(&csv, cli_args.separator.as_str());
+		let postfix = Postfix::new(&mut sheet);
+		let output = postfix.process_sheet();
 
 		if let Some(out_path) = cli_args.out_path {
 			let mut out_path = out_path.to_owned();
@@ -55,7 +55,7 @@ fn main() -> Result<()> {
 				eprintln!("Path for output file already exists {out_path:?}");
 				process::exit(1);
 			} else {
-				match write_from_string(out_path.clone(), postfix.sheet.to_string()) {
+				match write_from_string(out_path.clone(), output) {
 					Ok(()) => println!("File successfully written to {out_path:?}\nTime: {:#?}", time.elapsed()),
 					Err(error) => {
 						eprintln!("Failed to write file to {out_path:?}.\n{error}");
@@ -64,7 +64,7 @@ fn main() -> Result<()> {
 				}
 			}
 		} else {
-			println!("{}", postfix.sheet);
+			println!("{}", output);
 		}
 	}
 	Ok(())
