@@ -4,28 +4,24 @@ use crate::coord::Coord;
 
 #[derive(Debug, PartialEq)]
 pub struct Sheet<'a> {
-	pub data: Vec<Vec<String>>,
+	pub data: Vec<Vec<&'a str>>,
 	pub separator: &'a str,
 }
 
 impl<'a> Sheet<'a> {
-	pub fn new(input: String, separator: &'a str) -> Self {
+	pub fn new(input: &'a str, separator: &'a str) -> Self {
 		Self {
 			data: Self::parse(input, separator),
 			separator,
 		}
 	}
 
-	fn parse(input: String, separator: &str) -> Vec<Vec<String>> {
-		input
-			.trim()
-			.lines()
-			.map(|line| line.split(&separator).map(|s| s.to_string()).collect::<Vec<String>>())
-			.collect::<Vec<Vec<String>>>()
+	fn parse(input: &'a str, separator: &'a str) -> Vec<Vec<&'a str>> {
+		input.trim().lines().map(|line| line.split(&separator).collect::<Vec<&'a str>>()).collect::<Vec<Vec<&'a str>>>()
 	}
 
-	pub fn get(&self, coord: &Coord) -> Option<&String> {
-		self.data.get(coord.row).and_then(|cols| cols.get(coord.column))
+	pub fn get(&self, coord: &Coord) -> Option<&str> {
+		self.data.get(coord.row).and_then(|cols| cols.get(coord.column)).copied()
 	}
 }
 
@@ -43,36 +39,36 @@ impl<'a> fmt::Display for Sheet<'a> {
 #[test]
 fn parse_test() {
 	assert_eq!(
-		Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n"), ","),
+		Sheet::new(&"cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n", ","),
 		Sheet {
 			data: vec![
-				vec![String::from("cellA1"), String::from("cellB1"), String::from("cellC1")],
-				vec![String::from("cellA2"), String::from("cellB2"), String::from("cellC2")],
-				vec![String::from("cellA3"), String::from("cellB3"), String::from("cellC3")],
+				vec!["cellA1", "cellB1", "cellC1"],
+				vec!["cellA2", "cellB2", "cellC2"],
+				vec!["cellA3", "cellB3", "cellC3"],
 			],
 			separator: ","
 		}
 	);
 
 	assert_eq!(
-		Sheet::new(String::from("cellA1,cellB1,cellC1\r\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n"), ","),
+		Sheet::new("cellA1,cellB1,cellC1\r\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n", ","),
 		Sheet {
 			data: vec![
-				vec![String::from("cellA1"), String::from("cellB1"), String::from("cellC1")],
-				vec![String::from("cellA2"), String::from("cellB2"), String::from("cellC2")],
-				vec![String::from("cellA3"), String::from("cellB3"), String::from("cellC3")],
+				vec!["cellA1", "cellB1", "cellC1"],
+				vec!["cellA2", "cellB2", "cellC2"],
+				vec!["cellA3", "cellB3", "cellC3"],
 			],
 			separator: ","
 		}
 	);
 
 	assert_eq!(
-		Sheet::new(String::from("cellA1|cellB1|cellC1\ncellA2|cellB2|cellC2\ncellA3|cellB3|cellC3\n"), "|"),
+		Sheet::new("cellA1|cellB1|cellC1\ncellA2|cellB2|cellC2\ncellA3|cellB3|cellC3\n", "|"),
 		Sheet {
 			data: vec![
-				vec![String::from("cellA1"), String::from("cellB1"), String::from("cellC1")],
-				vec![String::from("cellA2"), String::from("cellB2"), String::from("cellC2")],
-				vec![String::from("cellA3"), String::from("cellB3"), String::from("cellC3")],
+				vec!["cellA1", "cellB1", "cellC1"],
+				vec!["cellA2", "cellB2", "cellC2"],
+				vec!["cellA3", "cellB3", "cellC3"],
 			],
 			separator: "|"
 		}
@@ -81,26 +77,26 @@ fn parse_test() {
 
 #[test]
 fn get_test() {
-	let sheet = Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n"), ",");
+	let sheet = Sheet::new("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3\n", ",");
 
-	assert_eq!(sheet.get(&Coord { column: 0, row: 0 }), Some(&String::from("cellA1")));
-	assert_eq!(sheet.get(&Coord { column: 1, row: 1 }), Some(&String::from("cellB2")));
-	assert_eq!(sheet.get(&Coord { column: 2, row: 2 }), Some(&String::from("cellC3")));
+	assert_eq!(sheet.get(&Coord { column: 0, row: 0 }), Some("cellA1"));
+	assert_eq!(sheet.get(&Coord { column: 1, row: 1 }), Some("cellB2"));
+	assert_eq!(sheet.get(&Coord { column: 2, row: 2 }), Some("cellC3"));
 	assert_eq!(sheet.get(&Coord { column: 0, row: 3 }), None);
 	assert_eq!(sheet.get(&Coord { column: 3, row: 0 }), None);
 }
 
 #[test]
 fn display_test() {
-	let sheet = Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2"), ",");
-	assert_eq!(format!("{sheet}"), String::from("cellA1,cellB1,cellC1\ncellA2,cellB2"));
+	let sheet = Sheet::new("cellA1,cellB1,cellC1\ncellA2,cellB2", ",");
+	assert_eq!(format!("{sheet}"), "cellA1,cellB1,cellC1\ncellA2,cellB2");
 
-	let sheet = Sheet::new(String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3"), ",");
-	assert_eq!(format!("{sheet}"), String::from("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3"));
+	let sheet = Sheet::new("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3", ",");
+	assert_eq!(format!("{sheet}"), "cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3");
 
-	let sheet = Sheet::new(String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2"), ";");
-	assert_eq!(format!("{sheet}"), String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2"));
+	let sheet = Sheet::new("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2", ";");
+	assert_eq!(format!("{sheet}"), "cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2");
 
-	let sheet = Sheet::new(String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2\n\n"), ";");
-	assert_eq!(format!("{sheet}"), String::from("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2"));
+	let sheet = Sheet::new("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2\n\n", ";");
+	assert_eq!(format!("{sheet}"), "cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2");
 }
