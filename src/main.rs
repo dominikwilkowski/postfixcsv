@@ -64,7 +64,7 @@ fn main() -> Result<()> {
 				}
 			}
 		} else {
-			println!("{}", postfix.sheet);
+			println!("{}", output);
 		}
 	}
 	Ok(())

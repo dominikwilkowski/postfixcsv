@@ -1,5 +1,3 @@
-use std::fmt;
-
 use crate::coord::Coord;
 
 #[derive(Debug, PartialEq)]
@@ -22,17 +20,6 @@ impl<'a> Sheet<'a> {
 
 	pub fn get(&self, coord: &Coord) -> Option<&str> {
 		self.data.get(coord.row).and_then(|cols| cols.get(coord.column)).copied()
-	}
-}
-
-impl<'a> fmt::Display for Sheet<'a> {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		let mut vec = Vec::new();
-		for row in &self.data {
-			vec.push(row.join(self.separator));
-		}
-		write!(f, "{}", vec.join("\n"))?;
-		Ok(())
 	}
 }
 
@@ -84,19 +71,4 @@ fn get_test() {
 	assert_eq!(sheet.get(&Coord { column: 2, row: 2 }), Some("cellC3"));
 	assert_eq!(sheet.get(&Coord { column: 0, row: 3 }), None);
 	assert_eq!(sheet.get(&Coord { column: 3, row: 0 }), None);
-}
-
-#[test]
-fn display_test() {
-	let sheet = Sheet::new("cellA1,cellB1,cellC1\ncellA2,cellB2", ",");
-	assert_eq!(format!("{sheet}"), "cellA1,cellB1,cellC1\ncellA2,cellB2");
-
-	let sheet = Sheet::new("cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3", ",");
-	assert_eq!(format!("{sheet}"), "cellA1,cellB1,cellC1\ncellA2,cellB2,cellC2\ncellA3,cellB3,cellC3");
-
-	let sheet = Sheet::new("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2", ";");
-	assert_eq!(format!("{sheet}"), "cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2");
-
-	let sheet = Sheet::new("cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2\n\n", ";");
-	assert_eq!(format!("{sheet}"), "cellA1;cellB1;cellC1\ncellA2;cellB2;cellC2");
 }
