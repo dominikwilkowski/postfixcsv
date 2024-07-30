@@ -116,11 +116,11 @@ impl<'a> Postfix<'a> {
 		}
 	}
 
-	pub fn process_sheet(&self) -> Vec<Vec<String>> {
+	pub fn process_sheet(&self) -> String {
 		let mut output = Vec::new();
 
 		for row in 0..self.sheet.data.len() {
-			output.push(Vec::new());
+			output.push(String::new());
 			for col in 0..self.sheet.data[row].len() {
 				let cell = &self.sheet.data[row][col];
 
@@ -129,10 +129,13 @@ impl<'a> Postfix<'a> {
 					Err(error) => error.to_string(),
 				};
 
-				output[row].push(value);
+				if col != 0 {
+					output[row].push_str(self.sheet.separator);
+				}
+				output[row].push_str(&value);
 			}
 		}
-		output
+		output.join("\n")
 	}
 }
 
@@ -414,12 +417,5 @@ fn process_sheet_test() {
 	let postfix = Postfix::new(&mut sheet);
 	let output = postfix.process_sheet();
 
-	assert_eq!(
-		output,
-		vec![
-			vec!["-8", "-13", "#ERR"],
-			vec!["-8", "5", "3.5"],
-			vec!["10.5", "#ERR", "14",],
-		]
-	);
+	assert_eq!(output, String::from("-8,-13,#ERR\n-8,5,3.5\n10.5,#ERR,14"));
 }

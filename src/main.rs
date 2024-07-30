@@ -43,12 +43,7 @@ fn main() -> Result<()> {
 
 		let mut sheet = Sheet::new(&csv, cli_args.separator.as_str());
 		let postfix = Postfix::new(&mut sheet);
-		let output_vec = postfix.process_sheet();
-		let mut vec = Vec::new();
-		for row in output_vec {
-			vec.push(row.join(","));
-		}
-		let output = vec.join("\n").to_owned();
+		let output = postfix.process_sheet();
 
 		if let Some(out_path) = cli_args.out_path {
 			let mut out_path = out_path.to_owned();
