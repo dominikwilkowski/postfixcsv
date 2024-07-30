@@ -40,8 +40,8 @@ impl<'a> Postfix<'a> {
 		}
 	}
 
-	fn sanatize_input(input: &str) -> Vec<String> {
-		input.split_whitespace().map(|s| s.to_string()).collect::<Vec<String>>()
+	fn sanatize_input(input: &str) -> Vec<&str> {
+		input.split_whitespace().collect::<Vec<&str>>()
 	}
 
 	pub fn calc_cell(&self, cell: &str, recursion_depth: u8) -> Result<f64, PostfixError> {
@@ -53,7 +53,7 @@ impl<'a> Postfix<'a> {
 
 		let cell = Self::sanatize_input(cell);
 		for item in &cell {
-			match item.as_str() {
+			match *item {
 				"+" => {
 					let (a, b) = (stack.pop(), stack.pop());
 					if let (Some(a), Some(b)) = (a, b) {
