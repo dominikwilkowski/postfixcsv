@@ -40,10 +40,6 @@ impl<'a> Postfix<'a> {
 		}
 	}
 
-	fn sanatize_input(input: &str) -> Vec<&str> {
-		input.split_whitespace().collect::<Vec<&str>>()
-	}
-
 	pub fn calc_cell(&self, cell: &str, recursion_depth: u8) -> Result<f64, PostfixError> {
 		let mut stack = Vec::new();
 
@@ -51,9 +47,8 @@ impl<'a> Postfix<'a> {
 			return Err(PostfixError::RecursionDepthExceeded);
 		}
 
-		let cell = Self::sanatize_input(cell);
-		for item in &cell {
-			match *item {
+		for item in cell.split_ascii_whitespace() {
+			match item {
 				"+" => {
 					let (a, b) = (stack.pop(), stack.pop());
 					if let (Some(a), Some(b)) = (a, b) {
