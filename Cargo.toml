@@ -1,4 +1,4 @@
 [workspace]
-members = ["process_csv"]
+members = ["generate_csv", "process_csv"]
 default-members = ["process_csv"]
 resolver = "2"

@@ -1,7 +1,6 @@
 POSTFIX-CSV
 ===========
 
-
 ## The task
 
 - Create a cli app that parses a csv file and outputs its content
