@@ -117,25 +117,26 @@ impl<'a> Postfix<'a> {
 	}
 
 	pub fn process_sheet(&self) -> String {
-		let mut output = Vec::new();
+		let mut output = String::new();
 
 		for row in 0..self.sheet.data.len() {
-			output.push(String::new());
+			if row != 0 {
+				output.push('\n');
+			}
 			for col in 0..self.sheet.data[row].len() {
 				let cell = &self.sheet.data[row][col];
 
-				let value = match self.calc_cell(cell, 0) {
-					Ok(result) => result.to_string(),
-					Err(error) => error.to_string(),
-				};
-
 				if col != 0 {
-					output[row].push_str(self.sheet.separator);
+					output.push_str(self.sheet.separator);
 				}
-				output[row].push_str(&value);
+
+				match self.calc_cell(cell, 0) {
+					Ok(result) => output.push_str(&result.to_string()),
+					Err(error) => output.push_str(&error.to_string()),
+				};
 			}
 		}
-		output.join("\n")
+		output
 	}
 }
 
