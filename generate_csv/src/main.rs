@@ -22,9 +22,9 @@ fn main() -> io::Result<()> {
 
 	for i in 0..num_expressions {
 		if i % COLS == 0 && i != 0 {
-			write!(file, ",")?;
-		} else if i % COLS == 0 {
 			write!(file, "\n")?;
+		} else if i % COLS != 0 {
+			write!(file, ",")?;
 		}
 
 		let expression = generate_random_expression(max_depth);
