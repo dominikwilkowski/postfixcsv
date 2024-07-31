@@ -1,6 +1,4 @@
-[package]
-name = "postfixcsv"
-version = "1.0.0"
-edition = "2021"
-
-[dependencies]
+[workspace]
+members = ["process_csv"]
+default-members = ["process_csv"]
+resolver = "2"
