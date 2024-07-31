@@ -68,7 +68,7 @@ impl Args {
 	}
 
 	pub fn help() -> String {
-		format!("{name} v{version}\n\nUsage: $ {name} [path/to/csv] [OPTIONS]\n\nOptions:\n  -V, --version        Print version info and exit\n  -h, --help           Print help and exit\n  -s, --separator \".\"  Set the separator for the CSV\n", name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"))
+		format!("{name} v{version}\n\nUsage: $ {name} [path/to/csv] [OPTIONS]\n\nOptions:\n  -V, --version        Print version info and exit\n  -h, --help           Print help and exit\n  -s, --separator \",\"  Set the separator for the CSV\n  -x, --overwrite      Allow to overwrite the output file if it exists\n", name = env!("CARGO_PKG_NAME"), version = env!("CARGO_PKG_VERSION"))
 	}
 
 	pub fn version() -> String {

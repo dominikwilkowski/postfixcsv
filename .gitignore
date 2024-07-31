@@ -21,4 +21,4 @@ Cargo.lock
 *.pdb
 
 # Build artifact
-postfix.csv
+*.csv
