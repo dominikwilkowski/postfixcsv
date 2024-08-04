@@ -259,10 +259,12 @@ fn calc_cell_test() {
 	);
 
 	let data = vec![
-		vec!["B1 B2 +", "2 B2 3 * -", "+"],
-		vec!["A1", "5", "7 2 /"],
-		vec!["C2 3 *", "1 2", "5 1 2 + 4 * + 3 -"],
+		vec!["B1 B2 +", "2 B2 3 * -", "+", "26"],
+		vec!["A1", "5", "7 2 /", "2 20 * 2 / 3 4 + 3 2 * * + 6 - 15 +"],
+		vec!["C2 3 *", "1 B4", "5 1 2 + 4 * + 3 -", "0.08 6 15 *"],
+		vec!["5 7 7 - /", "67.5 B3 *", "-14 A5 +", ""],
 	];
+	// ROW 1
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: data.clone(),
@@ -287,7 +289,16 @@ fn calc_cell_test() {
 		.calc_cell("+", 0),
 		Err(PostfixError::NotEnoughOperands)
 	);
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data.clone(),
+			separator: ","
+		})
+		.calc_cell("26", 0),
+		Ok(26.0)
+	);
 
+	// ROW 2
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: data.clone(),
@@ -312,7 +323,16 @@ fn calc_cell_test() {
 		.calc_cell("7 2 /", 0),
 		Ok(3.5)
 	);
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data.clone(),
+			separator: ","
+		})
+		.calc_cell("2 20 * 2 / 3 4 + 3 2 * * + 6 - 15 +", 0),
+		Ok(71.0)
+	);
 
+	// ROW 3
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: data.clone(),
@@ -326,11 +346,61 @@ fn calc_cell_test() {
 			data: data.clone(),
 			separator: ","
 		})
-		.calc_cell("1 2", 0),
+		.calc_cell("1 B4", 0),
+		Err(PostfixError::RecursionDepthExceeded)
+	);
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data.clone(),
+			separator: ","
+		})
+		.calc_cell("5 1 2 + 4 * + 3 -", 0),
+		Ok(14.0)
+	);
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data.clone(),
+			separator: ","
+		})
+		.calc_cell("0.08 6 15 *", 0),
 		Err(PostfixError::TooManyOperands)
 	);
-	assert_eq!(Postfix::new(&mut Sheet { data, separator: "," }).calc_cell("5 1 2 + 4 * + 3 -", 0), Ok(14.0));
 
+	// ROW 4
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data.clone(),
+			separator: ","
+		})
+		.calc_cell("5 7 7 - /", 0),
+		Err(PostfixError::DivisionByZero)
+	);
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data.clone(),
+			separator: ","
+		})
+		.calc_cell("67.5 B3 *", 0),
+		Err(PostfixError::RecursionDepthExceeded)
+	);
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data.clone(),
+			separator: ","
+		})
+		.calc_cell("-14 A5 +", 0),
+		Err(PostfixError::CellNotFound)
+	);
+	assert_eq!(
+		Postfix::new(&mut Sheet {
+			data: data,
+			separator: ","
+		})
+		.calc_cell("", 0),
+		Err(PostfixError::NotEnoughOperands)
+	);
+
+	// Edge cases
 	assert_eq!(
 		Postfix::new(&mut Sheet {
 			data: vec![vec!["B1", "A1 C1 +", "2"]],

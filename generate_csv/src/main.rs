@@ -9,8 +9,8 @@ mod postfix;
 
 use crate::{infix::generate_random_expression, postfix::infix_2_postfix};
 
-const ROWS: usize = 10_000;
-const COLS: usize = 10_000;
+const ROWS: usize = 10_0;
+const COLS: usize = 10_0;
 const OUTPUT_FILE_NAME: &'static str = "./postfix.csv";
 
 fn main() -> io::Result<()> {

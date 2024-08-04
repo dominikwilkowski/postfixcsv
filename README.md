@@ -28,15 +28,17 @@ The spreadsheet coordination system should be `[Col (alphabetical)][Row (numeric
 Test csv file:
 
 ```
-B1 B2 +,2 B2 3 * -,+
-A1,5,7 2 /
-C2 3 *,1 2,5 1 2 + 4 * + 3 -
+B1 B2 +,2 B2 3 * -,+,26
+A1,5,7 2 /,2 20 * 2 / 3 4 + 3 2 * * + 6 - 15 +
+C2 3 *,1 B4,5 1 2 + 4 * + 3 -,0.08 6 15 *
+5 7 7 - /,67.5 B3 *,-14 A5 +,
 ```
 
 Which should output:
 
 ```
--8,-13,#ERR
--8,5,3.5
-10.5,#ERR,14
+-8,-13,#ERR,26
+-8,5,3.5,71
+10.5,#ERR,14,#ERR
+#ERR,#ERR,#ERR,#ERR
 ```
