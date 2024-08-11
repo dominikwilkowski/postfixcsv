@@ -85,9 +85,7 @@ impl<'a> Postfix<'a> {
 					}
 				},
 				_ => {
-					if Coord::is_coord(item) {
-						let coord = Coord::parse(item);
-
+					if let Some(coord) = Coord::parse(item) {
 						match self.sheet.get(&coord) {
 							Some(contents) => {
 								match self.calc_cell(contents, recursion_depth + 1) {

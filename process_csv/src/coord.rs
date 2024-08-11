@@ -7,24 +7,41 @@ pub struct Coord {
 }
 
 impl Coord {
-	pub fn parse(input: &str) -> Coord {
+	pub fn parse(input: &str) -> Option<Coord> {
+		let mut has_letters = false;
+		let mut has_numbers = false;
+
 		let input = input.to_uppercase();
 		let mut row_string = String::new();
 
 		let mut column = 0;
-		input.chars().for_each(|item| {
-			if item.is_alphabetic() {
+		for item in input.chars() {
+			if item.is_ascii_alphabetic() {
+				if has_numbers {
+					return None;
+				}
 				let value = (item as usize) - ('A' as usize) + 1;
 				column = (26 * column) + value;
-			} else if item.is_numeric() {
+				has_letters = true;
+			} else if item.is_ascii_digit() {
+				if !has_letters {
+					return None;
+				}
 				row_string.push(item);
+				has_numbers = true;
+			} else {
+				return None;
 			}
-		});
+		}
 		column -= 1;
 
 		let row = row_string.parse::<usize>().unwrap_or(1) - 1;
 
-		Coord { column, row }
+		if has_letters && has_numbers {
+			Some(Coord { column, row })
+		} else {
+			None
+		}
 	}
 
 	pub fn stringify(&self) -> String {
@@ -43,73 +60,57 @@ impl Coord {
 
 		result.iter().collect::<String>() + &(self.row + 1).to_string()
 	}
-
-	pub fn is_coord(item: &str) -> bool {
-		let mut has_letters = false;
-		let mut has_numbers = false;
-		let mut is_coord = true;
-
-		for thing in item.chars() {
-			if thing.is_ascii_alphabetic() {
-				has_letters = true;
-				if has_numbers {
-					is_coord = false;
-					break;
-				}
-			} else if thing.is_ascii_digit() {
-				has_numbers = true;
-				if !has_letters {
-					is_coord = false;
-					break;
-				}
-			} else {
-				is_coord = false;
-				break;
-			}
-		}
-
-		if has_letters ^ has_numbers {
-			false
-		} else {
-			is_coord
-		}
-	}
 }
 
 #[test]
 fn parse_test() {
-	assert_eq!(Coord::parse("A1"), Coord { column: 0, row: 0 });
-	assert_eq!(Coord::parse("a1"), Coord { column: 0, row: 0 });
-	assert_eq!(Coord::parse("a10"), Coord { column: 0, row: 9 });
-	assert_eq!(Coord::parse("a510"), Coord { column: 0, row: 509 });
-	assert_eq!(Coord::parse("a-1"), Coord { column: 0, row: 0 });
-	assert_eq!(Coord::parse("b 5#"), Coord { column: 1, row: 4 });
-	assert_eq!(Coord::parse("B2"), Coord { column: 1, row: 1 });
-	assert_eq!(Coord::parse("Z2"), Coord { column: 25, row: 1 });
-	assert_eq!(Coord::parse("AA2"), Coord { column: 26, row: 1 });
-	assert_eq!(Coord::parse("AB2"), Coord { column: 27, row: 1 });
-	assert_eq!(Coord::parse("AZ2"), Coord { column: 51, row: 1 });
-	assert_eq!(Coord::parse("BA2"), Coord { column: 52, row: 1 });
-	assert_eq!(Coord::parse("BZ2"), Coord { column: 77, row: 1 });
-	assert_eq!(Coord::parse("CA2"), Coord { column: 78, row: 1 });
-	assert_eq!(Coord::parse("ZA2"), Coord { column: 676, row: 1 });
-	assert_eq!(Coord::parse("ZZ2"), Coord { column: 701, row: 1 });
-	assert_eq!(Coord::parse("AAA2"), Coord { column: 702, row: 1 });
-	assert_eq!(Coord::parse("AAB2"), Coord { column: 703, row: 1 });
+	assert_eq!(Coord::parse("A1"), Some(Coord { column: 0, row: 0 }));
+	assert_eq!(Coord::parse("a1"), Some(Coord { column: 0, row: 0 }));
+	assert_eq!(Coord::parse("a10"), Some(Coord { column: 0, row: 9 }));
+	assert_eq!(Coord::parse("a510"), Some(Coord { column: 0, row: 509 }));
+	assert_eq!(Coord::parse("B2"), Some(Coord { column: 1, row: 1 }));
+	assert_eq!(Coord::parse("Z2"), Some(Coord { column: 25, row: 1 }));
+	assert_eq!(Coord::parse("AA2"), Some(Coord { column: 26, row: 1 }));
+	assert_eq!(Coord::parse("AB2"), Some(Coord { column: 27, row: 1 }));
+	assert_eq!(Coord::parse("AZ2"), Some(Coord { column: 51, row: 1 }));
+	assert_eq!(Coord::parse("BA2"), Some(Coord { column: 52, row: 1 }));
+	assert_eq!(Coord::parse("BZ2"), Some(Coord { column: 77, row: 1 }));
+	assert_eq!(Coord::parse("CA2"), Some(Coord { column: 78, row: 1 }));
+	assert_eq!(Coord::parse("ZA2"), Some(Coord { column: 676, row: 1 }));
+	assert_eq!(Coord::parse("ZZ2"), Some(Coord { column: 701, row: 1 }));
+	assert_eq!(Coord::parse("AAA2"), Some(Coord { column: 702, row: 1 }));
+	assert_eq!(Coord::parse("AAB2"), Some(Coord { column: 703, row: 1 }));
 	assert_eq!(
 		Coord::parse("ZZZ50"),
-		Coord {
+		Some(Coord {
 			column: 18_277,
 			row: 49
-		}
+		})
 	);
 	assert_eq!(
 		Coord::parse("FZZ123412021312"),
-		Coord {
+		Some(Coord {
 			column: 4_757,
 			row: 123_412_021_311
-		}
+		})
 	);
+
+	assert_eq!(Coord::parse("A1"), Some(Coord { column: 0, row: 0 }));
+	assert_eq!(Coord::parse("AA11"), Some(Coord { column: 26, row: 10 }));
+	assert_eq!(Coord::parse("ZZZZ1"), Some(Coord { column: 475253, row: 0 }));
+	assert_eq!(Coord::parse("Z1234"), Some(Coord { column: 25, row: 1233 }));
+	assert_eq!(Coord::parse("a1"), Some(Coord { column: 0, row: 0 }));
+
+	assert_eq!(Coord::parse("1"), None);
+	assert_eq!(Coord::parse("A"), None);
+	assert_eq!(Coord::parse("A1A"), None);
+	assert_eq!(Coord::parse("1A1"), None);
+	assert_eq!(Coord::parse("A1A1"), None);
+	assert_eq!(Coord::parse("AAA123.123"), None);
+	assert_eq!(Coord::parse("A 1"), None);
+	assert_eq!(Coord::parse("AB2/3"), None);
+	assert_eq!(Coord::parse("a-1"), None);
+	assert_eq!(Coord::parse("b 5#"), None);
 }
 
 #[test]
@@ -128,24 +129,6 @@ fn stringify_test() {
 		.stringify(),
 		String::from("ACOG1001")
 	);
-}
-
-#[test]
-fn is_coord_test() {
-	assert_eq!(Coord::is_coord("A1"), true);
-	assert_eq!(Coord::is_coord("AA11"), true);
-	assert_eq!(Coord::is_coord("ZZZZ1"), true);
-	assert_eq!(Coord::is_coord("Z1234"), true);
-	assert_eq!(Coord::is_coord("a1"), true);
-
-	assert_eq!(Coord::is_coord("1"), false);
-	assert_eq!(Coord::is_coord("A"), false);
-	assert_eq!(Coord::is_coord("A1A"), false);
-	assert_eq!(Coord::is_coord("1A1"), false);
-	assert_eq!(Coord::is_coord("A1A1"), false);
-	assert_eq!(Coord::is_coord("AAA123.123"), false);
-	assert_eq!(Coord::is_coord("A 1"), false);
-	assert_eq!(Coord::is_coord("AB2/3"), false);
 }
 
 impl fmt::Display for Coord {
