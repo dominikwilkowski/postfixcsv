@@ -11,7 +11,6 @@ impl Coord {
 		let mut has_letters = false;
 		let mut has_numbers = false;
 
-		let input = input.to_uppercase();
 		let mut row_string = String::new();
 
 		let mut column = 0;
@@ -20,7 +19,12 @@ impl Coord {
 				if has_numbers {
 					return None;
 				}
-				let value = (item as usize) - ('A' as usize) + 1;
+				let case_conversion = if item.is_ascii_lowercase() {
+					'a' as usize - 'A' as usize
+				} else {
+					0
+				};
+				let value = (item as usize) - case_conversion - ('A' as usize) + 1;
 				column = (26 * column) + value;
 				has_letters = true;
 			} else if item.is_ascii_digit() {
