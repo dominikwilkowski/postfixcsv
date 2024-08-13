@@ -16,6 +16,7 @@ fn main() -> io::Result<()> {
 	let time = Instant::now();
 	let cli_args = env::args().skip(1).collect::<Vec<String>>();
 
+	#[allow(clippy::get_first)]
 	let rows = cli_args.get(0).unwrap_or(&String::from("100")).parse::<usize>().unwrap_or(100);
 	let cols = cli_args.get(1).unwrap_or(&String::from("100")).parse::<usize>().unwrap_or(100);
 
