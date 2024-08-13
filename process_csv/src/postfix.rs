@@ -49,7 +49,7 @@ impl<'a> Postfix<'a> {
 
 	pub fn calc_cell(&self, this_coord: &Coord, cell: &str, call_stack: &mut Vec<Coord>) -> Result<f64, PostfixError> {
 		let mut stack = Vec::new();
-		let is_recursive_call = call_stack.len() > 0;
+		let is_recursive_call = !call_stack.is_empty();
 
 		if call_stack.contains(this_coord) {
 			#[cfg(debug_assertions)]
