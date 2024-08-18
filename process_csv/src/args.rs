@@ -3,7 +3,7 @@ use std::{env, path::PathBuf, process};
 #[derive(Debug, PartialEq)]
 pub struct Args {
 	pub csv_path: PathBuf,
-	pub separator: String,
+	pub separator: char,
 	pub out_path: Option<PathBuf>,
 	pub overwrite: bool,
 	pub help: bool,
@@ -14,7 +14,7 @@ impl Args {
 	pub fn parse(args: Vec<String>) -> Self {
 		let mut flags = Self {
 			csv_path: PathBuf::new(),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -35,7 +35,7 @@ impl Args {
 				},
 				"-s" | "--separator" => {
 					if let Some(next_arg) = iter.next() {
-						flags.separator.clone_from(next_arg);
+						flags.separator = next_arg.chars().next().unwrap_or(',');
 					} else {
 						eprintln!("The flag `--separator` is missing its argument to specifiy what the separator is");
 						process::exit(1);
@@ -82,7 +82,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -93,7 +93,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("-v")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -104,7 +104,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("-V")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -115,7 +115,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("--version")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -126,7 +126,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("-h")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: true,
@@ -137,7 +137,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("--help")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: true,
@@ -148,7 +148,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("-x")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: true,
 			help: false,
@@ -159,7 +159,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("--overwrite")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: true,
 			help: false,
@@ -170,7 +170,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("--unknown")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -181,7 +181,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("-z")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -192,7 +192,7 @@ fn parse_test() {
 		Args::parse(vec![String::from("path/to/somehwere"), String::from("-s"), String::from(".")]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from("."),
+			separator: '.',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -207,7 +207,7 @@ fn parse_test() {
 		]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from("."),
+			separator: '.',
 			out_path: None,
 			overwrite: false,
 			help: false,
@@ -222,7 +222,7 @@ fn parse_test() {
 		]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: Some(PathBuf::from("path/to")),
 			overwrite: false,
 			help: false,
@@ -237,7 +237,7 @@ fn parse_test() {
 		]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from(","),
+			separator: ',',
 			out_path: Some(PathBuf::from("path/to")),
 			overwrite: false,
 			help: false,
@@ -249,7 +249,7 @@ fn parse_test() {
 			String::from("-v"),
 			String::from("path/to/somehwere"),
 			String::from("-s"),
-			String::from("..."),
+			String::from("…"),
 			String::from("-o"),
 			String::from("path/to"),
 			String::from("-x"),
@@ -258,7 +258,7 @@ fn parse_test() {
 		]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from("..."),
+			separator: '…',
 			out_path: Some(PathBuf::from("path/to")),
 			overwrite: true,
 			help: true,
@@ -272,14 +272,14 @@ fn parse_test() {
 			String::from("-v"),
 			String::from("-x"),
 			String::from("-s"),
-			String::from("..."),
+			String::from("…"),
 			String::from("-h"),
 			String::from("-w"),
 			String::from("path/to/somehwere")
 		]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere"),
-			separator: String::from("..."),
+			separator: '…',
 			out_path: Some(PathBuf::from("path/to")),
 			overwrite: true,
 			help: true,
@@ -295,13 +295,13 @@ fn parse_test() {
 			String::from("--help"),
 			String::from("--overwrite"),
 			String::from("--separator"),
-			String::from("..."),
+			String::from("…"),
 			String::from("--windows"),
 			String::from("path/to/elsewhere")
 		]),
 		Args {
 			csv_path: PathBuf::from("path/to/somehwere/path/to/elsewhere"),
-			separator: String::from("..."),
+			separator: '…',
 			out_path: Some(PathBuf::from("path/to")),
 			overwrite: true,
 			help: true,

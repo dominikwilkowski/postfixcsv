@@ -41,7 +41,7 @@ fn main() -> Result<()> {
 			Err(error) => return Err(error),
 		};
 
-		let mut sheet = Sheet::new(&csv, cli_args.separator.as_str());
+		let mut sheet = Sheet::new(&csv, cli_args.separator);
 		let postfix = Postfix::new(&mut sheet);
 		let output = postfix.process_sheet(csv.capacity());
 

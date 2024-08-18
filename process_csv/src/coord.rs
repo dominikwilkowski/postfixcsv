@@ -11,9 +11,9 @@ impl Coord {
 		let mut has_letters = false;
 		let mut has_numbers = false;
 
-		let mut row_string = String::new();
+		let mut column: usize = 0;
+		let mut row: usize = 0;
 
-		let mut column = 0;
 		for item in input.chars() {
 			if item.is_ascii_alphabetic() {
 				if has_numbers {
@@ -24,25 +24,24 @@ impl Coord {
 				} else {
 					0
 				};
-				let value = (item as usize) - case_conversion - ('A' as usize) + 1;
-				column = (26 * column) + value;
+				column = (26 * column) + (item as usize) - case_conversion - ('A' as usize) + 1;
 				has_letters = true;
 			} else if item.is_ascii_digit() {
 				if !has_letters {
 					return None;
 				}
-				row_string.push(item);
+				row = row * 10 + (item as usize - '0' as usize);
 				has_numbers = true;
 			} else {
 				return None;
 			}
 		}
-		column -= 1;
 
-		let row = row_string.parse::<usize>().unwrap_or(1) - 1;
-
-		if has_letters && has_numbers {
-			Some(Coord { column, row })
+		if has_letters && has_numbers && row > 0 {
+			Some(Coord {
+				column: column - 1,
+				row: row - 1,
+			})
 		} else {
 			None
 		}
@@ -107,6 +106,7 @@ fn parse_test() {
 
 	assert_eq!(Coord::parse("1"), None);
 	assert_eq!(Coord::parse("A"), None);
+	assert_eq!(Coord::parse("5A"), None);
 	assert_eq!(Coord::parse("A1A"), None);
 	assert_eq!(Coord::parse("1A1"), None);
 	assert_eq!(Coord::parse("A1A1"), None);
