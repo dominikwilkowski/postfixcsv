@@ -16,7 +16,7 @@ pub enum PostfixError {
 
 impl fmt::Display for PostfixError {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		write!(f, "#ERR")
+		f.write_str("#ERR")
 	}
 }
 
@@ -128,7 +128,7 @@ impl<'a> Postfix<'a> {
 
 	pub fn process_sheet(&self, capacity: usize) -> String {
 		let mut output = String::with_capacity(capacity);
-		let mut call_stack = Vec::new();
+		let mut call_stack = Vec::with_capacity(100);
 
 		for row in 0..self.sheet.data.len() {
 			if row != 0 {
