@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{self, Write};
 
 use crate::{coord::Coord, sheet::Sheet};
 
@@ -126,23 +126,23 @@ impl<'a> Postfix<'a> {
 		}
 	}
 
-	pub fn process_sheet(&self) -> String {
-		let mut output = String::new();
+	pub fn process_sheet(&self, capacity: usize) -> String {
+		let mut output = String::with_capacity(capacity);
 
 		for row in 0..self.sheet.data.len() {
 			if row != 0 {
-				output.push('\n');
+				write!(&mut output, "\n").unwrap();
 			}
 			for column in 0..self.sheet.data[row].len() {
-				let cell = &self.sheet.data[row][column];
+				let cell = self.sheet.data[row][column];
 
 				if column != 0 {
-					output.push_str(self.sheet.separator);
+					write!(&mut output, "{}", self.sheet.separator).unwrap();
 				}
 
 				match self.calc_cell(&Coord { column, row }, cell, &mut Vec::new()) {
-					Ok(result) => output.push_str(&result.to_string()),
-					Err(error) => output.push_str(&error.to_string()),
+					Ok(result) => write!(&mut output, "{}", result).unwrap(),
+					Err(error) => write!(&mut output, "{}", error).unwrap(),
 				};
 			}
 		}
@@ -505,7 +505,7 @@ fn process_sheet_test() {
 	];
 	let mut sheet = Sheet { data, separator: "," };
 	let postfix = Postfix::new(&mut sheet);
-	let output = postfix.process_sheet();
+	let output = postfix.process_sheet(20);
 
 	assert_eq!(output, String::from("-8,-13,#ERR\n-8,5,3.5\n10.5,#ERR,14"));
 }

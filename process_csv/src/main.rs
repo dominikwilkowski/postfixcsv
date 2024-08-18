@@ -43,7 +43,7 @@ fn main() -> Result<()> {
 
 		let mut sheet = Sheet::new(&csv, cli_args.separator.as_str());
 		let postfix = Postfix::new(&mut sheet);
-		let output = postfix.process_sheet();
+		let output = postfix.process_sheet(csv.capacity());
 
 		if let Some(out_path) = cli_args.out_path {
 			let mut out_path = out_path.to_owned();
